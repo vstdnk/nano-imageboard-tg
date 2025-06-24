@@ -107,28 +107,10 @@
         border-left-color: var(--tg-theme-link-color);
       }
       
-      .debug-info {
-        margin-top: 20px;
-        padding: 8px;
-        font-size: 12px;
-        font-family: monospace;
-        background: rgba(0, 0, 0, 0.05);
-        border-radius: 4px;
-        max-width: 280px;
-        overflow: auto;
-        text-align: left;
-        white-space: pre-wrap;
-      }
-      
-      html.dark .debug-info {
-        background: rgba(255, 255, 255, 0.1);
-      }
-      
-      #error-message {
-        color: #d32f2f;
-        margin-top: 10px;
-        text-align: center;
-        max-width: 280px;
+      .loading-text {
+        font-size: 14px;
+        letter-spacing: 1px;
+        font-weight: bold;
       }
       
       @keyframes spin {
@@ -171,56 +153,43 @@
       }
       
       .content {
-        padding: 20px 16px;
+        padding: 0;
+        height: calc(100% - 49px - var(--safe-area-inset-top));
+        overflow-y: auto;
+        -webkit-overflow-scrolling: touch;
       }
       
       .welcome-text {
         margin-bottom: 24px;
         font-size: 18px;
         text-align: center;
+        padding: 20px 16px 0;
       }
       
-      .demo-card {
+      /* Стили для секций */
+      .section {
+        padding: 20px 16px;
+        margin-bottom: 1px;
+      }
+      
+      .section-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: var(--tg-theme-text-color);
+      }
+      
+      .section-content {
         background-color: var(--tg-theme-secondary-bg-color);
         border-radius: 12px;
-        padding: 20px;
-        margin-bottom: 20px;
+        padding: 16px;
+        min-height: 120px;
       }
       
-      .demo-card h2 {
-        margin-bottom: 8px;
-        font-size: 16px;
-      }
-      
-      .demo-card p {
-        margin-bottom: 16px;
+      .section-content p {
         color: var(--tg-theme-hint-color);
         font-size: 14px;
-      }
-      
-      .button {
-        background-color: var(--tg-theme-button-color);
-        color: var(--tg-theme-button-text-color);
-        border: none;
-        border-radius: 8px;
-        padding: 12px 20px;
-        font-size: 16px;
-        font-weight: 500;
-        cursor: pointer;
-        transition: opacity 0.2s;
-        width: 100%;
-        margin-top: 12px;
-      }
-      
-      .button:active {
-        opacity: 0.8;
-      }
-      
-      .test-button {
-        background-color: var(--tg-theme-secondary-bg-color);
-        color: var(--tg-theme-link-color);
-        border: 1px solid var(--tg-theme-button-color);
-        margin-top: 10px;
+        line-height: 1.5;
       }
     </style>
     <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-3gLjB2Dm.js"></script>
@@ -230,14 +199,11 @@
     <!-- Базовый экран загрузки -->
     <div id="app-loading">
       <div class="spinner"></div>
-      <div>Загрузка Telegram WebApp...</div>
-      <div id="error-message"></div>
-      <div class="debug-info" id="debug-info"></div>
-      <button id="force-continue" style="margin-top: 20px; padding: 8px 16px; background: var(--tg-theme-button-color); color: white; border: none; border-radius: 4px; display: none;">Продолжить</button>
+      <div class="loading-text">BOARD LOADING...</div>
     </div>
     
     <!-- Базовый интерфейс приложения - будет виден даже без Vue -->
-    <div id="basic-app" style="display: none; height: 100%; overflow: auto;">
+    <div id="basic-app" style="display: none; height: 100%; overflow: hidden;">
       <div class="header">
         <button class="back-button" id="close-app">
           <span>&larr;</span>
@@ -251,17 +217,26 @@
           Добро пожаловать в Telegram WebApp!
         </p>
         
-        <div class="demo-card">
-          <h2>Демонстрация возможностей</h2>
-          <p>Это шаблон для разработки приложений Telegram WebApp</p>
-          
-          <button class="button" id="show-main-button">
-            Показать кнопку Telegram
-          </button>
-          
-          <button class="button test-button" id="test-button">
-            Тестовая кнопка
-          </button>
+        <!-- Три прокручиваемые секции -->
+        <div class="section">
+          <div class="section-title">Секция 1</div>
+          <div class="section-content">
+            <p>Это первая секция вашего приложения. Здесь может быть размещен любой контент, такой как изображения, текст или интерактивные элементы.</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Секция 2</div>
+          <div class="section-content">
+            <p>Вторая секция для другого контента. Вы можете добавить здесь свой специфический контент или функциональность для вашего приложения.</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Секция 3</div>
+          <div class="section-content">
+            <p>Третья секция завершает интерфейс. Это прокручиваемая панель, и вы можете добавить сколько угодно секций.</p>
+          </div>
         </div>
       </div>
     </div>
@@ -273,10 +248,7 @@
       // Базовая проверка наличия Telegram WebApp API
       window.addEventListener('DOMContentLoaded', function() {
         // Элементы страницы
-        var debugInfo = document.getElementById('debug-info');
-        var errorMsg = document.getElementById('error-message');
         var appLoading = document.getElementById('app-loading');
-        var forceContinue = document.getElementById('force-continue');
         var basicApp = document.getElementById('basic-app');
         var vueApp = document.getElementById('app');
         
@@ -301,85 +273,18 @@
             document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
           }
           
-          // Обработчики для базовых кнопок
+          // Обработчик для кнопки закрытия
           document.getElementById('close-app').addEventListener('click', function() {
             tg.close();
           });
-          
-          document.getElementById('show-main-button').addEventListener('click', function() {
-            tg.MainButton.setText('ПРОДОЛЖИТЬ');
-            tg.MainButton.show();
-          });
-          
-          document.getElementById('test-button').addEventListener('click', function() {
-            console.log('Тестовая кнопка нажата');
-          });
         }
-        
-        // iOS полноэкранный режим - блокировка прокрутки на уровне документа
-        document.addEventListener('touchmove', function(e) {
-          if (e.target.tagName !== 'DIV' && e.target.tagName !== 'UL' && e.target.tagName !== 'OL') {
-            e.preventDefault();
-          }
-        }, { passive: false });
-        
-        // Проверяем доступность API и выводим информацию
-        setTimeout(function() {
-          var info = {
-            api: Boolean(window.Telegram),
-            webApp: Boolean(window.Telegram && window.Telegram.WebApp),
-            time: new Date().toISOString(),
-            userAgent: navigator.userAgent
-          };
-          
-          if (window.Telegram && window.Telegram.WebApp) {
-            info.version = window.Telegram.WebApp.version;
-            info.colorScheme = window.Telegram.WebApp.colorScheme;
-            info.platform = window.Telegram.WebApp.platform;
-            
-            // Сообщаем Telegram что приложение готово
-            try {
-              window.Telegram.WebApp.ready();
-              window.Telegram.WebApp.expand();
-            } catch (e) {
-              console.error('Ошибка при инициализации Telegram WebApp:', e);
-            }
-            
-            // Принудительно устанавливаем полноэкранный режим для мобильных устройств
-            document.documentElement.style.height = '100%';
-            document.body.style.height = '100%';
-          } else {
-            errorMsg.textContent = 'Telegram WebApp API не обнаружен';
-          }
-          
-          if (debugInfo) {
-            debugInfo.textContent = JSON.stringify(info, null, 2);
-          }
-          
-          // Показываем кнопку продолжить через 3 секунды если экран загрузки все еще виден
-          setTimeout(function() {
-            if (!appLoading.classList.contains('hidden')) {
-              forceContinue.style.display = 'block';
-              forceContinue.addEventListener('click', function() {
-                hideLoading();
-              });
-            }
-          }, 3000);
-          
-          // Запасной вариант для автоматического скрытия через 7 секунд
-          setTimeout(function() {
-            hideLoading();
-          }, 7000);
-        }, 500);
         
         // Функция скрытия экрана загрузки
         window.hideLoading = function() {
-          console.log('Скрываем экран загрузки и показываем базовый интерфейс');
-          
           // Скрываем экран загрузки
           appLoading.classList.add('hidden');
           
-          // Пробуем сначала отобразить базовый интерфейс вместо Vue
+          // Показываем базовый интерфейс
           basicApp.style.display = 'block';
           
           try {
@@ -387,18 +292,34 @@
             setTimeout(function() {
               vueApp.style.display = 'block';
               
-              // Если после 3 секунд Vue все еще не работает, минимальный интерфейс уже виден
+              // Полностью удаляем экран загрузки после анимации
               setTimeout(function() {
-                // Полностью удаляем экран загрузки
                 if (appLoading.parentNode) {
                   appLoading.parentNode.removeChild(appLoading);
                 }
-              }, 3000);
-            }, 500);
+              }, 300);
+            }, 100);
           } catch (e) {
             console.error('Ошибка при инициализации Vue:', e);
           }
         };
+        
+        // Инициализация Telegram WebApp
+        setTimeout(function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            try {
+              // Сообщаем Telegram что приложение готово
+              window.Telegram.WebApp.ready();
+              window.Telegram.WebApp.expand();
+              
+              // Принудительно устанавливаем полноэкранный режим
+              document.documentElement.style.height = '100%';
+              document.body.style.height = '100%';
+            } catch (e) {
+              console.error('Ошибка при инициализации Telegram WebApp:', e);
+            }
+          }
+        }, 100);
       });
     </script>
     
