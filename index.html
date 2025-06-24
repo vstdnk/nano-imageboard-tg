@@ -266,6 +266,61 @@
         font-size: 14px;
         line-height: 1.5;
       }
+      
+      /* Стили для списка досок */
+      .boards-list {
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+      }
+      
+      .board-item {
+        padding: 4px 0;
+      }
+      
+      .board-link {
+        color: var(--tg-theme-link-color);
+        text-decoration: none;
+        display: block;
+        padding: 6px 0;
+        font-size: 14px;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .board-name {
+        font-weight: 500;
+      }
+      
+      .loading-boards {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 20px;
+        color: var(--tg-theme-hint-color);
+      }
+      
+      .error-message {
+        padding: 20px;
+        color: #ff3b30;
+        text-align: center;
+      }
+      
+      .cache-warning {
+        padding: 10px;
+        margin-bottom: 10px;
+        background-color: rgba(255, 204, 0, 0.1);
+        border-left: 3px solid #ffcc00;
+        color: var(--tg-theme-hint-color);
+        font-size: 13px;
+        text-align: center;
+        border-radius: 6px;
+      }
+      
+      /* Дополнительные стили для темной темы */
+      html.dark .board-link {
+        border-bottom-color: rgba(255, 255, 255, 0.05);
+      }
     </style>
     <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-BYsZT7GY.js"></script>
     <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-7Wij1rAw.css">
@@ -288,28 +343,14 @@
       
       <div class="content">
         <p class="welcome-text">
-          Добро пожаловать в Telegram WebApp!
+          Добро пожаловать в Telegram 2ch Imgboard!
         </p>
         
-        <!-- Три прокручиваемые секции -->
-        <div class="section">
-          <div class="section-title">Секция 1</div>
-          <div class="section-content">
-            <p>Это первая секция вашего приложения. Здесь может быть размещен любой контент, такой как изображения, текст или интерактивные элементы.</p>
-          </div>
-        </div>
-        
-        <div class="section">
-          <div class="section-title">Секция 2</div>
-          <div class="section-content">
-            <p>Вторая секция для другого контента. Вы можете добавить здесь свой специфический контент или функциональность для вашего приложения.</p>
-          </div>
-        </div>
-        
-        <div class="section">
-          <div class="section-title">Секция 3</div>
-          <div class="section-content">
-            <p>Третья секция завершает интерфейс. Это прокручиваемая панель, и вы можете добавить сколько угодно секций.</p>
+        <div id="boards-container">
+          <!-- Здесь будут отображаться разделы и доски -->
+          <div class="loading-boards">
+            <div class="spinner"></div>
+            <p>Загрузка списка досок...</p>
           </div>
         </div>
       </div>
@@ -322,6 +363,164 @@
       // Определяем iOS устройства
       var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
+      // Функция для загрузки списка досок с API 2ch.hk
+      function loadBoards() {
+        var boardsContainer = document.getElementById('boards-container');
+        
+        // Отображаем индикатор загрузки
+        boardsContainer.innerHTML = '<div class="loading-boards"><div class="spinner"></div><p>Загрузка списка досок...</p></div>';
+        
+        // Проверяем кэш в localStorage
+        var cachedData = localStorage.getItem('2ch_boards_data');
+        var cachedTime = localStorage.getItem('2ch_boards_timestamp');
+        var currentTime = new Date().getTime();
+        
+        // Если есть кэш и он не старше 1 часа, используем его
+        if (cachedData && cachedTime && (currentTime - parseInt(cachedTime) < 3600000)) {
+          try {
+            var data = JSON.parse(cachedData);
+            renderBoards(data);
+            console.log('Данные загружены из кэша');
+            return;
+          } catch (e) {
+            console.error('Ошибка при чтении кэша:', e);
+            // Если ошибка при чтении кэша, продолжаем загрузку с сервера
+          }
+        }
+        
+        // Запрос к API с обработкой CORS
+        var proxyUrl = 'https://cors-anywhere.herokuapp.com/';
+        var targetUrl = 'https://2ch.hk/api/mobile/v2/boards';
+        
+        fetch(targetUrl)
+          .then(function(response) {
+            if (!response.ok) {
+              throw new Error('Ошибка при загрузке данных: ' + response.status);
+            }
+            return response.json();
+          })
+          .then(function(data) {
+            // Сохраняем данные в localStorage
+            localStorage.setItem('2ch_boards_data', JSON.stringify(data));
+            localStorage.setItem('2ch_boards_timestamp', currentTime.toString());
+            
+            renderBoards(data);
+          })
+          .catch(function(error) {
+            console.error('Ошибка загрузки данных:', error);
+            
+            // Пробуем использовать прокси при ошибке CORS
+            console.log('Пробуем использовать прокси...');
+            fetch(proxyUrl + targetUrl)
+              .then(function(response) {
+                if (!response.ok) {
+                  throw new Error('Ошибка при загрузке данных через прокси: ' + response.status);
+                }
+                return response.json();
+              })
+              .then(function(data) {
+                // Сохраняем данные в localStorage
+                localStorage.setItem('2ch_boards_data', JSON.stringify(data));
+                localStorage.setItem('2ch_boards_timestamp', currentTime.toString());
+                
+                renderBoards(data);
+              })
+              .catch(function(error) {
+                console.error('Ошибка загрузки данных через прокси:', error);
+                
+                // Если есть устаревший кэш, используем его как запасной вариант
+                if (cachedData) {
+                  try {
+                    var oldData = JSON.parse(cachedData);
+                    renderBoards(oldData);
+                    console.log('Данные загружены из устаревшего кэша');
+                    
+                    // Показываем предупреждение о устаревших данных
+                    var warning = document.createElement('div');
+                    warning.className = 'cache-warning';
+                    warning.textContent = 'Отображены сохраненные данные. Не удалось обновить информацию.';
+                    boardsContainer.insertBefore(warning, boardsContainer.firstChild);
+                    
+                    return;
+                  } catch (e) {
+                    console.error('Ошибка при чтении устаревшего кэша:', e);
+                  }
+                }
+                
+                boardsContainer.innerHTML = '<div class="error-message"><p>Ошибка при загрузке списка досок. Пожалуйста, попробуйте позже.</p></div>';
+              });
+          });
+      }
+      
+      // Функция для отображения досок
+      function renderBoards(data) {
+        var boardsContainer = document.getElementById('boards-container');
+        
+        // Группируем доски по категориям
+        var categories = {};
+        
+        // Перебираем все доски и группируем их по категориям
+        data.data.forEach(function(board) {
+          if (!categories[board.category]) {
+            categories[board.category] = [];
+          }
+          categories[board.category].push(board);
+        });
+        
+        // Очищаем контейнер
+        boardsContainer.innerHTML = '';
+        
+        // Создаем секции для каждой категории
+        Object.keys(categories).sort().forEach(function(categoryName) {
+          var section = document.createElement('div');
+          section.className = 'section';
+          
+          var sectionTitle = document.createElement('div');
+          sectionTitle.className = 'section-title';
+          sectionTitle.textContent = categoryName;
+          
+          var sectionContent = document.createElement('div');
+          sectionContent.className = 'section-content';
+          
+          // Создаем список досок для этой категории
+          var boardsList = document.createElement('div');
+          boardsList.className = 'boards-list';
+          
+          // Сортируем доски по ID
+          categories[categoryName].sort(function(a, b) {
+            return a.id.localeCompare(b.id);
+          }).forEach(function(board) {
+            var boardItem = document.createElement('div');
+            boardItem.className = 'board-item';
+            
+            var boardLink = document.createElement('a');
+            boardLink.href = 'javascript:void(0);';
+            boardLink.className = 'board-link';
+            boardLink.setAttribute('data-board', board.id);
+            
+            var boardName = document.createElement('span');
+            boardName.className = 'board-name';
+            boardName.textContent = '/' + board.id + '/ - ' + board.name;
+            
+            boardLink.appendChild(boardName);
+            boardItem.appendChild(boardLink);
+            boardsList.appendChild(boardItem);
+            
+            // Добавляем обработчик клика
+            boardLink.addEventListener('click', function() {
+              alert('Выбрана доска: /' + board.id + '/ - ' + board.name);
+              // Здесь можно добавить переход на доску
+            });
+          });
+          
+          sectionContent.appendChild(boardsList);
+          section.appendChild(sectionTitle);
+          section.appendChild(sectionContent);
+          
+          boardsContainer.appendChild(section);
+        });
+      }
+      
       // Базовая проверка наличия Telegram WebApp API
       window.addEventListener('DOMContentLoaded', function() {
         // Элементы страницы
@@ -329,6 +528,9 @@
         var basicApp = document.getElementById('basic-app');
         var vueApp = document.getElementById('app');
         var isAppHidden = false;
+        
+        // Загружаем список досок
+        loadBoards();
         
         // Настраиваем для iOS
         if (isIOS) {
@@ -471,55 +673,16 @@
             }
           }
           
-          // Автоматически активируем полноэкранный режим при загрузке
+          // Попытка включить полноэкранный режим сразу при загрузке
           setTimeout(function() {
             try {
-              // Эмулируем нажатие кнопки полноэкранного режима
-              var fullscreenButton = document.getElementById('fullscreen-app');
-              if (fullscreenButton) {
-                // Программно вызываем клик на кнопке полноэкранного режима
-                console.log('Эмулируем нажатие кнопки полноэкранного режима');
-                
-                // Визуальная обратная связь (как при нажатии)
-                if (isIOS) {
-                  fullscreenButton.style.opacity = '0.7';
-                  setTimeout(function() {
-                    fullscreenButton.style.opacity = '1';
-                  }, 100);
-                }
-                
-                // Вызываем событие клика на кнопке
-                var clickEvent = new MouseEvent('click', {
-                  bubbles: true,
-                  cancelable: true,
-                  view: window
-                });
-                fullscreenButton.dispatchEvent(clickEvent);
-                
-                // Для iOS дополнительно эмулируем touch событие
-                if (isIOS) {
-                  // Эмулируем touchend событие, которое обрабатывается в обработчике кнопки
-                  var touchEndEvent = new Event('touchend', {
-                    bubbles: true,
-                    cancelable: true
-                  });
-                  fullscreenButton.dispatchEvent(touchEndEvent);
-                }
-                
-                // Прямой вызов функции toggleFullScreen для большей надежности
-                setTimeout(function() {
-                  if (typeof toggleFullScreen === 'function') {
-                    console.log('Прямой вызов функции toggleFullScreen');
-                    toggleFullScreen();
-                  }
-                }, 200);
-              } else {
-                console.error('Кнопка полноэкранного режима не найдена');
-              }
+              // Вызываем функцию переключения полноэкранного режима
+              toggleFullScreen();
+              console.log('Автоматически активирован полноэкранный режим');
             } catch (e) {
-              console.error('Ошибка при эмуляции нажатия кнопки полноэкранного режима:', e);
+              console.error('Ошибка при активации полноэкранного режима:', e);
             }
-          }, isIOS ? 800 : 500);
+          }, isIOS ? 1000 : 500);
         }
         
         // Функция скрытия экрана загрузки
@@ -573,50 +736,6 @@
               // Принудительно устанавливаем полноэкранный режим
               document.documentElement.style.height = '100%';
               document.body.style.height = '100%';
-              
-              // Функция для периодической активации полноэкранного режима
-              var attemptCount = 0;
-              var maxAttempts = 5;
-              var attemptInterval = isIOS ? 1000 : 500;
-              
-              function attemptFullscreen() {
-                if (attemptCount >= maxAttempts) return;
-                
-                attemptCount++;
-                console.log('Попытка активации полноэкранного режима #' + attemptCount);
-                
-                try {
-                  // Эмулируем нажатие кнопки полноэкранного режима
-                  var fullscreenButton = document.getElementById('fullscreen-app');
-                  if (fullscreenButton && typeof toggleFullScreen === 'function') {
-                    toggleFullScreen();
-                  }
-                  
-                  // Дополнительно используем прямые методы
-                  if (window.Telegram && window.Telegram.WebApp) {
-                    var tgApp = window.Telegram.WebApp;
-                    if (typeof tgApp.requestFullscreen === 'function') {
-                      tgApp.requestFullscreen();
-                    }
-                    if (typeof tgApp.expand === 'function') {
-                      tgApp.expand();
-                    }
-                  }
-                  
-                  // Для iOS добавляем специальный класс
-                  if (isIOS) {
-                    document.body.classList.add('ios-fullscreen');
-                  }
-                } catch (e) {
-                  console.error('Ошибка при попытке активации полноэкранного режима:', e);
-                }
-                
-                // Планируем следующую попытку
-                setTimeout(attemptFullscreen, attemptInterval);
-              }
-              
-              // Запускаем первую попытку с небольшой задержкой
-              setTimeout(attemptFullscreen, attemptInterval);
             } catch (e) {
               console.error('Ошибка при инициализации Telegram WebApp:', e);
             }
@@ -633,28 +752,6 @@
         window.addEventListener('load', function() {
           setTimeout(function() {
             window.hideLoading();
-            
-            // Дополнительная проверка полноэкранного режима
-            setTimeout(function() {
-              try {
-                if (isIOS) {
-                  // Принудительно активируем полноэкранный режим еще раз
-                  document.body.classList.add('ios-fullscreen');
-                  
-                  if (tg && typeof tg.requestFullscreen === 'function') {
-                    tg.requestFullscreen();
-                  }
-                  
-                  if (tg && typeof tg.expand === 'function') {
-                    tg.expand();
-                  }
-                  
-                  console.log('Дополнительная активация полноэкранного режима для iOS');
-                }
-              } catch (e) {
-                console.error('Ошибка при дополнительной активации полноэкранного режима:', e);
-              }
-            }, 1000);
           }, 500);
         });
       });
