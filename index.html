@@ -282,13 +282,27 @@
         color: var(--tg-theme-link-color);
         text-decoration: none;
         display: block;
-        padding: 6px 0;
+        padding: 10px 0;
         font-size: 14px;
         border-bottom: 1px solid rgba(0, 0, 0, 0.05);
       }
       
       .board-name {
         font-weight: 500;
+        margin-bottom: 3px;
+      }
+      
+      .board-id {
+        font-weight: 700;
+        color: var(--tg-theme-button-color);
+      }
+      
+      .board-info {
+        font-size: 12px;
+        color: var(--tg-theme-hint-color);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
       }
       
       .loading-boards {
@@ -320,6 +334,98 @@
       /* Дополнительные стили для темной темы */
       html.dark .board-link {
         border-bottom-color: rgba(255, 255, 255, 0.05);
+      }
+      
+      /* Стили для модального окна */
+      .modal-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background-color: rgba(0, 0, 0, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        z-index: 1000;
+        animation: fadeIn 0.2s ease-out;
+      }
+      
+      .modal-container {
+        background-color: var(--tg-theme-bg-color);
+        border-radius: 12px;
+        width: 90%;
+        max-width: 340px;
+        max-height: 90vh;
+        overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        animation: slideUp 0.3s ease-out;
+      }
+      
+      .modal-header {
+        padding: 16px 16px 12px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .modal-header h3 {
+        margin: 0;
+        font-size: 16px;
+        font-weight: 600;
+        color: var(--tg-theme-text-color);
+      }
+      
+      .modal-close {
+        background: none;
+        border: none;
+        font-size: 24px;
+        line-height: 1;
+        color: var(--tg-theme-hint-color);
+        cursor: pointer;
+        padding: 0;
+      }
+      
+      .modal-content {
+        padding: 16px;
+        color: var(--tg-theme-text-color);
+        max-height: 60vh;
+        overflow-y: auto;
+      }
+      
+      .modal-actions {
+        padding: 12px 16px 16px;
+        display: flex;
+        justify-content: flex-end;
+        gap: 8px;
+        border-top: 1px solid rgba(0, 0, 0, 0.05);
+      }
+      
+      .modal-button {
+        padding: 8px 16px;
+        border-radius: 8px;
+        font-size: 14px;
+        font-weight: 500;
+        border: none;
+        background-color: var(--tg-theme-secondary-bg-color);
+        color: var(--tg-theme-text-color);
+        cursor: pointer;
+      }
+      
+      .modal-button.primary {
+        background-color: var(--tg-theme-button-color);
+        color: var(--tg-theme-button-text-color);
+      }
+      
+      @keyframes fadeIn {
+        from { opacity: 0; }
+        to { opacity: 1; }
+      }
+      
+      @keyframes slideUp {
+        from { transform: translateY(20px); opacity: 0; }
+        to { transform: translateY(0); opacity: 1; }
       }
     </style>
     <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-BYsZT7GY.js"></script>
@@ -388,68 +494,77 @@
           }
         }
         
-        // Запрос к API с обработкой CORS
-        var proxyUrl = 'https://cors-anywhere.herokuapp.com/';
-        var targetUrl = 'https://2ch.hk/api/mobile/v2/boards';
+        // Используем статические данные вместо API из-за CORS-ограничений
+        var staticBoardsData = {
+          "data": [
+            // Тематика
+            {"id": "b", "name": "Бред", "category": "Тематика", "info": "Разговоры обо всём", "threads_per_page": 15},
+            {"id": "vg", "name": "Видеоигры", "category": "Тематика", "info": "Обсуждение видеоигр", "threads_per_page": 15},
+            {"id": "news", "name": "Новости", "category": "Тематика", "info": "Обсуждение новостей", "threads_per_page": 15},
+            {"id": "po", "name": "Политика", "category": "Тематика", "info": "Обсуждение политики", "threads_per_page": 15},
+            {"id": "tv", "name": "Кино и сериалы", "category": "Тематика", "info": "Обсуждение кино и сериалов", "threads_per_page": 15},
+            {"id": "mu", "name": "Музыка", "category": "Тематика", "info": "Обсуждение музыки", "threads_per_page": 15},
+            {"id": "hw", "name": "Железо", "category": "Тематика", "info": "Компьютерное железо", "threads_per_page": 15},
+            {"id": "sci", "name": "Наука", "category": "Тематика", "info": "Наука и технологии", "threads_per_page": 15},
+            {"id": "pr", "name": "Программирование", "category": "Тематика", "info": "Программирование", "threads_per_page": 15},
+            {"id": "soc", "name": "Общение", "category": "Тематика", "info": "Общение", "threads_per_page": 15},
+            {"id": "mov", "name": "Фильмы", "category": "Тематика", "info": "Фильмы", "threads_per_page": 15},
+            {"id": "au", "name": "Автомобили", "category": "Тематика", "info": "Автомобили и транспорт", "threads_per_page": 15},
+            
+            // Разное
+            {"id": "media", "name": "Медиа", "category": "Разное", "info": "Картинки, видео и прочее", "threads_per_page": 15},
+            {"id": "r", "name": "Просьбы", "category": "Разное", "info": "Просьбы", "threads_per_page": 15},
+            {"id": "api", "name": "API", "category": "Разное", "info": "API", "threads_per_page": 15},
+            {"id": "rf", "name": "Убежище", "category": "Разное", "info": "Убежище", "threads_per_page": 15},
+            {"id": "int", "name": "International", "category": "Разное", "info": "International", "threads_per_page": 15},
+            {"id": "mlp", "name": "My Little Pony", "category": "Разное", "info": "My Little Pony", "threads_per_page": 15},
+            
+            // Творчество
+            {"id": "wp", "name": "Обои", "category": "Творчество", "info": "Обои", "threads_per_page": 15},
+            {"id": "di", "name": "Дизайн", "category": "Творчество", "info": "Дизайн", "threads_per_page": 15},
+            {"id": "de", "name": "Столовая", "category": "Творчество", "info": "Столовая", "threads_per_page": 15},
+            {"id": "mg", "name": "Магия", "category": "Творчество", "info": "Магия", "threads_per_page": 15},
+            {"id": "p", "name": "Фотография", "category": "Творчество", "info": "Фотография", "threads_per_page": 15},
+            {"id": "pa", "name": "Живопись", "category": "Творчество", "info": "Живопись", "threads_per_page": 15},
+            {"id": "wh", "name": "Warhammer", "category": "Творчество", "info": "Warhammer", "threads_per_page": 15},
+            
+            // Взрослым
+            {"id": "wrk", "name": "Работа", "category": "Взрослым", "info": "Работа и карьера", "threads_per_page": 15},
+            {"id": "fg", "name": "Трапы", "category": "Взрослым", "info": "Трапы", "threads_per_page": 15},
+            {"id": "hc", "name": "Hardcore", "category": "Взрослым", "info": "Hardcore", "threads_per_page": 15},
+            {"id": "e", "name": "Эротика", "category": "Взрослым", "info": "Эротика", "threads_per_page": 15},
+            
+            // Игры
+            {"id": "mc", "name": "Minecraft", "category": "Игры", "info": "Minecraft", "threads_per_page": 15},
+            {"id": "wr", "name": "Warcraft", "category": "Игры", "info": "Warcraft", "threads_per_page": 15},
+            {"id": "mmo", "name": "MMO", "category": "Игры", "info": "MMO", "threads_per_page": 15},
+            {"id": "gd", "name": "Gamedev", "category": "Игры", "info": "Разработка игр", "threads_per_page": 15},
+            
+            // Японская культура
+            {"id": "a", "name": "Аниме", "category": "Японская культура", "info": "Аниме", "threads_per_page": 15},
+            {"id": "ma", "name": "Манга", "category": "Японская культура", "info": "Манга", "threads_per_page": 15},
+            {"id": "vn", "name": "Визуальные новеллы", "category": "Японская культура", "info": "Визуальные новеллы", "threads_per_page": 15}
+          ]
+        };
         
-        fetch(targetUrl)
-          .then(function(response) {
-            if (!response.ok) {
-              throw new Error('Ошибка при загрузке данных: ' + response.status);
-            }
-            return response.json();
-          })
-          .then(function(data) {
-            // Сохраняем данные в localStorage
-            localStorage.setItem('2ch_boards_data', JSON.stringify(data));
-            localStorage.setItem('2ch_boards_timestamp', currentTime.toString());
-            
-            renderBoards(data);
-          })
-          .catch(function(error) {
-            console.error('Ошибка загрузки данных:', error);
-            
-            // Пробуем использовать прокси при ошибке CORS
-            console.log('Пробуем использовать прокси...');
-            fetch(proxyUrl + targetUrl)
-              .then(function(response) {
-                if (!response.ok) {
-                  throw new Error('Ошибка при загрузке данных через прокси: ' + response.status);
-                }
-                return response.json();
-              })
-              .then(function(data) {
-                // Сохраняем данные в localStorage
-                localStorage.setItem('2ch_boards_data', JSON.stringify(data));
-                localStorage.setItem('2ch_boards_timestamp', currentTime.toString());
-                
-                renderBoards(data);
-              })
-              .catch(function(error) {
-                console.error('Ошибка загрузки данных через прокси:', error);
-                
-                // Если есть устаревший кэш, используем его как запасной вариант
-                if (cachedData) {
-                  try {
-                    var oldData = JSON.parse(cachedData);
-                    renderBoards(oldData);
-                    console.log('Данные загружены из устаревшего кэша');
-                    
-                    // Показываем предупреждение о устаревших данных
-                    var warning = document.createElement('div');
-                    warning.className = 'cache-warning';
-                    warning.textContent = 'Отображены сохраненные данные. Не удалось обновить информацию.';
-                    boardsContainer.insertBefore(warning, boardsContainer.firstChild);
-                    
-                    return;
-                  } catch (e) {
-                    console.error('Ошибка при чтении устаревшего кэша:', e);
-                  }
-                }
-                
-                boardsContainer.innerHTML = '<div class="error-message"><p>Ошибка при загрузке списка досок. Пожалуйста, попробуйте позже.</p></div>';
-              });
-          });
+        // Сохраняем статические данные в localStorage
+        localStorage.setItem('2ch_boards_data', JSON.stringify(staticBoardsData));
+        localStorage.setItem('2ch_boards_timestamp', currentTime.toString());
+        
+        // Отображаем статические данные
+        renderBoards(staticBoardsData);
+        console.log('Загружены статические данные');
+        
+        // Добавляем предупреждение о статических данных
+        setTimeout(function() {
+          var warning = document.createElement('div');
+          warning.className = 'cache-warning';
+          warning.textContent = 'Отображены локальные данные. API недоступен из-за CORS-ограничений.';
+          var container = document.getElementById('boards-container');
+          if (container && container.firstChild) {
+            container.insertBefore(warning, container.firstChild);
+          }
+        }, 500);
       }
       
       // Функция для отображения досок
@@ -498,18 +613,23 @@
             boardLink.className = 'board-link';
             boardLink.setAttribute('data-board', board.id);
             
-            var boardName = document.createElement('span');
+            var boardName = document.createElement('div');
             boardName.className = 'board-name';
-            boardName.textContent = '/' + board.id + '/ - ' + board.name;
+            boardName.innerHTML = '<span class="board-id">/' + board.id + '/</span> - ' + board.name;
+            
+            var boardInfo = document.createElement('div');
+            boardInfo.className = 'board-info';
+            boardInfo.textContent = board.info || '';
             
             boardLink.appendChild(boardName);
+            boardLink.appendChild(boardInfo);
             boardItem.appendChild(boardLink);
             boardsList.appendChild(boardItem);
             
             // Добавляем обработчик клика
             boardLink.addEventListener('click', function() {
-              alert('Выбрана доска: /' + board.id + '/ - ' + board.name);
-              // Здесь можно добавить переход на доску
+              // Создаем модальное окно с информацией о доске
+              showBoardModal(board);
             });
           });
           
@@ -518,6 +638,80 @@
           section.appendChild(sectionContent);
           
           boardsContainer.appendChild(section);
+        });
+      }
+      
+      // Функция для отображения модального окна с информацией о доске
+      function showBoardModal(board) {
+        // Создаем затемнение
+        var overlay = document.createElement('div');
+        overlay.className = 'modal-overlay';
+        
+        // Создаем модальное окно
+        var modal = document.createElement('div');
+        modal.className = 'modal-container';
+        
+        // Заголовок модального окна
+        var modalHeader = document.createElement('div');
+        modalHeader.className = 'modal-header';
+        
+        var modalTitle = document.createElement('h3');
+        modalTitle.textContent = '/' + board.id + '/ - ' + board.name;
+        
+        var closeButton = document.createElement('button');
+        closeButton.className = 'modal-close';
+        closeButton.textContent = '×';
+        closeButton.addEventListener('click', function() {
+          document.body.removeChild(overlay);
+        });
+        
+        modalHeader.appendChild(modalTitle);
+        modalHeader.appendChild(closeButton);
+        
+        // Содержимое модального окна
+        var modalContent = document.createElement('div');
+        modalContent.className = 'modal-content';
+        
+        var boardDescription = document.createElement('p');
+        boardDescription.textContent = board.info || 'Нет описания';
+        
+        modalContent.appendChild(boardDescription);
+        
+        // Кнопки действий
+        var modalActions = document.createElement('div');
+        modalActions.className = 'modal-actions';
+        
+        var openBoardButton = document.createElement('button');
+        openBoardButton.className = 'modal-button primary';
+        openBoardButton.textContent = 'Открыть доску';
+        openBoardButton.addEventListener('click', function() {
+          alert('Открытие доски /' + board.id + '/ будет реализовано в следующей версии');
+          document.body.removeChild(overlay);
+        });
+        
+        var cancelButton = document.createElement('button');
+        cancelButton.className = 'modal-button';
+        cancelButton.textContent = 'Отмена';
+        cancelButton.addEventListener('click', function() {
+          document.body.removeChild(overlay);
+        });
+        
+        modalActions.appendChild(openBoardButton);
+        modalActions.appendChild(cancelButton);
+        
+        // Собираем модальное окно
+        modal.appendChild(modalHeader);
+        modal.appendChild(modalContent);
+        modal.appendChild(modalActions);
+        
+        overlay.appendChild(modal);
+        document.body.appendChild(overlay);
+        
+        // Добавляем обработчик клика по затемнению для закрытия
+        overlay.addEventListener('click', function(event) {
+          if (event.target === overlay) {
+            document.body.removeChild(overlay);
+          }
         });
       }
       
