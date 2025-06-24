@@ -251,6 +251,7 @@
         var appLoading = document.getElementById('app-loading');
         var basicApp = document.getElementById('basic-app');
         var vueApp = document.getElementById('app');
+        var isAppHidden = false;
         
         // Инициализация Telegram API
         var tg = null;
@@ -281,6 +282,9 @@
         
         // Функция скрытия экрана загрузки
         window.hideLoading = function() {
+          if (isAppHidden) return; // Предотвращаем повторное скрытие
+          isAppHidden = true;
+          
           // Скрываем экран загрузки
           appLoading.classList.add('hidden');
           
@@ -304,7 +308,7 @@
           }
         };
         
-        // Инициализация Telegram WebApp
+        // Инициализация Telegram WebApp и автоматическое скрытие экрана загрузки
         setTimeout(function() {
           if (window.Telegram && window.Telegram.WebApp) {
             try {
@@ -319,7 +323,19 @@
               console.error('Ошибка при инициализации Telegram WebApp:', e);
             }
           }
+          
+          // ВАЖНО: Принудительно скрываем экран загрузки через 1.5 секунды
+          setTimeout(function() {
+            window.hideLoading();
+          }, 1500);
         }, 100);
+        
+        // Дополнительная защита: скрываем экран загрузки при загрузке страницы
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            window.hideLoading();
+          }, 500);
+        });
       });
     </script>
     
