@@ -17,12 +17,40 @@
     <!-- Загружаем Telegram WebApp скрипт до основного приложения -->
     <script src="https://telegram.org/js/telegram-web-app.js"></script>
 
-    <!-- Стили для базового экрана загрузки -->
+    <!-- Встроенные базовые стили -->
     <style>
-      body {
+      :root {
+        --tg-theme-bg-color: #ffffff;
+        --tg-theme-text-color: #222222;
+        --tg-theme-hint-color: #999999;
+        --tg-theme-link-color: #2678b6;
+        --tg-theme-button-color: #2678b6;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #f5f5f5;
+        --safe-area-inset-top: env(safe-area-inset-top);
+        --safe-area-inset-bottom: env(safe-area-inset-bottom);
+      }
+      
+      html.dark {
+        --tg-theme-bg-color: #212121;
+        --tg-theme-text-color: #ffffff;
+        --tg-theme-hint-color: #aaaaaa;
+        --tg-theme-link-color: #8cc2ff;
+        --tg-theme-button-color: #2678b6;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #292929;
+      }
+      
+      * {
         margin: 0;
         padding: 0;
+        box-sizing: border-box;
+      }
+      
+      body {
         font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
         /* Предотвращение прокрутки и полноэкранный режим */
         position: fixed;
         top: 0;
@@ -33,6 +61,7 @@
         height: 100%;
         width: 100%;
       }
+      
       #app {
         height: 100%;
         width: 100%;
@@ -40,6 +69,7 @@
         -webkit-overflow-scrolling: touch;
         position: relative;
       }
+      
       #app-loading {
         position: fixed;
         top: 0;
@@ -50,32 +80,33 @@
         flex-direction: column;
         align-items: center;
         justify-content: center;
-        background-color: #fff;
-        color: #000;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
         transition: opacity 0.3s;
         z-index: 9999;
       }
-      .dark #app-loading {
-        background-color: #212121;
-        color: #fff;
-      }
+      
       #app-loading.hidden {
         opacity: 0;
         pointer-events: none;
+        z-index: -1;
       }
+      
       .spinner {
         width: 40px;
         height: 40px;
         margin-bottom: 20px;
         border: 4px solid rgba(0, 0, 0, 0.1);
-        border-left-color: #2678b6;
+        border-left-color: var(--tg-theme-button-color);
         border-radius: 50%;
         animation: spin 1s linear infinite;
       }
-      .dark .spinner {
+      
+      html.dark .spinner {
         border: 4px solid rgba(255, 255, 255, 0.1);
-        border-left-color: #8cc2ff;
+        border-left-color: var(--tg-theme-link-color);
       }
+      
       .debug-info {
         margin-top: 20px;
         padding: 8px;
@@ -88,50 +119,203 @@
         text-align: left;
         white-space: pre-wrap;
       }
-      .dark .debug-info {
+      
+      html.dark .debug-info {
         background: rgba(255, 255, 255, 0.1);
       }
+      
       #error-message {
         color: #d32f2f;
         margin-top: 10px;
         text-align: center;
         max-width: 280px;
       }
+      
       @keyframes spin {
         to { transform: rotate(360deg); }
+      }
+      
+      /* Стили для базового интерфейса */
+      .header {
+        background-color: var(--tg-theme-secondary-bg-color);
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding-top: calc(16px + var(--safe-area-inset-top));
+      }
+      
+      .header h1 {
+        font-size: 18px;
+        font-weight: bold;
+        flex-grow: 1;
+        text-align: center;
+      }
+      
+      .back-button {
+        background: none;
+        border: none;
+        color: var(--tg-theme-button-color);
+        font-size: 18px;
+        padding: 8px;
+        cursor: pointer;
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+      }
+      
+      .content {
+        padding: 20px 16px;
+      }
+      
+      .welcome-text {
+        margin-bottom: 24px;
+        font-size: 18px;
+        text-align: center;
+      }
+      
+      .demo-card {
+        background-color: var(--tg-theme-secondary-bg-color);
+        border-radius: 12px;
+        padding: 20px;
+        margin-bottom: 20px;
+      }
+      
+      .demo-card h2 {
+        margin-bottom: 8px;
+        font-size: 16px;
+      }
+      
+      .demo-card p {
+        margin-bottom: 16px;
+        color: var(--tg-theme-hint-color);
+        font-size: 14px;
+      }
+      
+      .button {
+        background-color: var(--tg-theme-button-color);
+        color: var(--tg-theme-button-text-color);
+        border: none;
+        border-radius: 8px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 500;
+        cursor: pointer;
+        transition: opacity 0.2s;
+        width: 100%;
+        margin-top: 12px;
+      }
+      
+      .button:active {
+        opacity: 0.8;
+      }
+      
+      .test-button {
+        background-color: var(--tg-theme-secondary-bg-color);
+        color: var(--tg-theme-link-color);
+        border: 1px solid var(--tg-theme-button-color);
+        margin-top: 10px;
       }
     </style>
     <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-3gLjB2Dm.js"></script>
     <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-DcIFoIXr.css">
   </head>
   <body>
-    <!-- Базовый экран загрузки, видимый до инициализации Vue -->
+    <!-- Базовый экран загрузки -->
     <div id="app-loading">
       <div class="spinner"></div>
       <div>Загрузка Telegram WebApp...</div>
       <div id="error-message"></div>
       <div class="debug-info" id="debug-info"></div>
-      <!-- Кнопка для ручного скрытия экрана загрузки -->
-      <button id="force-continue" style="margin-top: 20px; padding: 8px 16px; background: #2678b6; color: white; border: none; border-radius: 4px; display: none;">Продолжить</button>
+      <button id="force-continue" style="margin-top: 20px; padding: 8px 16px; background: var(--tg-theme-button-color); color: white; border: none; border-radius: 4px; display: none;">Продолжить</button>
     </div>
     
-    <div id="app"></div>
+    <!-- Базовый интерфейс приложения - будет виден даже без Vue -->
+    <div id="basic-app" style="display: none; height: 100%; overflow: auto;">
+      <div class="header">
+        <button class="back-button" id="close-app">
+          <span>&larr;</span>
+        </button>
+        <h1>TG Imgboard</h1>
+        <div></div>
+      </div>
+      
+      <div class="content">
+        <p class="welcome-text">
+          Добро пожаловать в Telegram WebApp!
+        </p>
+        
+        <div class="demo-card">
+          <h2>Демонстрация возможностей</h2>
+          <p>Это шаблон для разработки приложений Telegram WebApp</p>
+          
+          <button class="button" id="show-main-button">
+            Показать кнопку Telegram
+          </button>
+          
+          <button class="button test-button" id="test-button">
+            Тестовая кнопка
+          </button>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Контейнер для Vue приложения -->
+    <div id="app" style="display: none;"></div>
 
     <script>
       // Базовая проверка наличия Telegram WebApp API
       window.addEventListener('DOMContentLoaded', function() {
+        // Элементы страницы
         var debugInfo = document.getElementById('debug-info');
         var errorMsg = document.getElementById('error-message');
         var appLoading = document.getElementById('app-loading');
         var forceContinue = document.getElementById('force-continue');
+        var basicApp = document.getElementById('basic-app');
+        var vueApp = document.getElementById('app');
         
-        // Применяем темную тему если нужно
+        // Инициализация Telegram API
+        var tg = null;
         if (window.Telegram && window.Telegram.WebApp) {
-          if (window.Telegram.WebApp.colorScheme === 'dark') {
-            document.body.classList.add('dark');
+          tg = window.Telegram.WebApp;
+          
+          // Применяем темную тему если нужно
+          if (tg.colorScheme === 'dark') {
+            document.documentElement.classList.add('dark');
           }
+          
+          // Настройка переменных CSS на основе Telegram темы
+          if (tg.themeParams) {
+            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+            document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+            document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
+            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+            document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
+          }
+          
+          // Обработчики для базовых кнопок
+          document.getElementById('close-app').addEventListener('click', function() {
+            tg.close();
+          });
+          
+          document.getElementById('show-main-button').addEventListener('click', function() {
+            tg.MainButton.setText('ПРОДОЛЖИТЬ');
+            tg.MainButton.show();
+          });
+          
+          document.getElementById('test-button').addEventListener('click', function() {
+            console.log('Тестовая кнопка нажата');
+          });
         }
-
+        
         // iOS полноэкранный режим - блокировка прокрутки на уровне документа
         document.addEventListener('touchmove', function(e) {
           if (e.target.tagName !== 'DIV' && e.target.tagName !== 'UL' && e.target.tagName !== 'OL') {
@@ -139,7 +323,7 @@
           }
         }, { passive: false });
         
-        // Проверяем доступность API
+        // Проверяем доступность API и выводим информацию
         setTimeout(function() {
           var info = {
             api: Boolean(window.Telegram),
@@ -172,7 +356,7 @@
             debugInfo.textContent = JSON.stringify(info, null, 2);
           }
           
-          // Показываем кнопку продолжить через 5 секунд если экран загрузки все еще виден
+          // Показываем кнопку продолжить через 3 секунды если экран загрузки все еще виден
           setTimeout(function() {
             if (!appLoading.classList.contains('hidden')) {
               forceContinue.style.display = 'block';
@@ -180,29 +364,44 @@
                 hideLoading();
               });
             }
-          }, 5000);
+          }, 3000);
+          
+          // Запасной вариант для автоматического скрытия через 7 секунд
+          setTimeout(function() {
+            hideLoading();
+          }, 7000);
         }, 500);
         
-        // Скрываем экран загрузки когда Vue приложение готово
+        // Функция скрытия экрана загрузки
         window.hideLoading = function() {
-          console.log('Скрываем экран загрузки');
-          if (appLoading) {
-            appLoading.classList.add('hidden');
-            // Полностью удаляем элемент после анимации
+          console.log('Скрываем экран загрузки и показываем базовый интерфейс');
+          
+          // Скрываем экран загрузки
+          appLoading.classList.add('hidden');
+          
+          // Пробуем сначала отобразить базовый интерфейс вместо Vue
+          basicApp.style.display = 'block';
+          
+          try {
+            // Пытаемся монтировать Vue приложение с задержкой
             setTimeout(function() {
-              if (appLoading.parentNode) {
-                appLoading.parentNode.removeChild(appLoading);
-              }
-            }, 300);
+              vueApp.style.display = 'block';
+              
+              // Если после 3 секунд Vue все еще не работает, минимальный интерфейс уже виден
+              setTimeout(function() {
+                // Полностью удаляем экран загрузки
+                if (appLoading.parentNode) {
+                  appLoading.parentNode.removeChild(appLoading);
+                }
+              }, 3000);
+            }, 500);
+          } catch (e) {
+            console.error('Ошибка при инициализации Vue:', e);
           }
         };
-
-        // Запасной вариант для автоматического скрытия экрана загрузки через 10 секунд
-        setTimeout(function() {
-          window.hideLoading();
-        }, 10000);
       });
     </script>
     
+    <!-- Vue приложение (загружается отложенно) -->
   </body>
 </html>
