@@ -10,6 +10,8 @@
     <meta name="apple-mobile-web-app-title" content="TG Imgboard">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="theme-color" content="#2678b6">
+    <!-- Специфичные для iOS стили -->
+    <meta name="format-detection" content="telephone=no">
     <link rel="apple-touch-icon" href="/webapp-tg-imgboard/apple-touch-icon.png">
     <link rel="manifest" href="/webapp-tg-imgboard/manifest.json">
     <title>TG Imgboard</title>
@@ -27,8 +29,8 @@
         --tg-theme-button-color: #2678b6;
         --tg-theme-button-text-color: #ffffff;
         --tg-theme-secondary-bg-color: #f5f5f5;
-        --safe-area-inset-top: env(safe-area-inset-top);
-        --safe-area-inset-bottom: env(safe-area-inset-bottom);
+        --safe-area-inset-top: env(safe-area-inset-top, 0px);
+        --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
       }
       
       html.dark {
@@ -45,6 +47,15 @@
         margin: 0;
         padding: 0;
         box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      html, body {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
       }
       
       body {
@@ -58,8 +69,8 @@
         right: 0;
         bottom: 0;
         overflow: hidden;
-        height: 100%;
-        width: 100%;
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
       }
       
       #app {
@@ -127,6 +138,8 @@
         position: relative;
         box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
         padding-top: calc(16px + var(--safe-area-inset-top));
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
       }
       
       .header h1 {
@@ -150,13 +163,30 @@
         z-index: 10;
         display: flex;
         align-items: center;
+        -webkit-appearance: none;
+        appearance: none;
       }
       
-      .content {
-        padding: 0;
-        height: calc(100% - 49px - var(--safe-area-inset-top));
-        overflow-y: auto;
-        -webkit-overflow-scrolling: touch;
+      /* Специфичные для iOS стили */
+      @supports (-webkit-touch-callout: none) {
+        .content {
+          padding: 0;
+          height: calc(100vh - 49px - env(safe-area-inset-top, 0px));
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          position: relative;
+          z-index: 1;
+        }
+      }
+      
+      /* Стили для других платформ */
+      @supports not (-webkit-touch-callout: none) {
+        .content {
+          padding: 0;
+          height: calc(100% - 49px - var(--safe-area-inset-top));
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
       }
       
       .welcome-text {
@@ -184,6 +214,8 @@
         border-radius: 12px;
         padding: 16px;
         min-height: 120px;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
       }
       
       .section-content p {
@@ -245,6 +277,9 @@
     <div id="app" style="display: none;"></div>
 
     <script>
+      // Определяем iOS устройства
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
       // Базовая проверка наличия Telegram WebApp API
       window.addEventListener('DOMContentLoaded', function() {
         // Элементы страницы
@@ -252,6 +287,11 @@
         var basicApp = document.getElementById('basic-app');
         var vueApp = document.getElementById('app');
         var isAppHidden = false;
+        
+        // Настраиваем для iOS
+        if (isIOS) {
+          document.body.classList.add('ios');
+        }
         
         // Инициализация Telegram API
         var tg = null;
@@ -275,9 +315,27 @@
           }
           
           // Обработчик для кнопки закрытия
-          document.getElementById('close-app').addEventListener('click', function() {
-            tg.close();
-          });
+          var closeButton = document.getElementById('close-app');
+          if (closeButton) {
+            closeButton.addEventListener('click', function() {
+              if (tg && typeof tg.close === 'function') {
+                tg.close();
+              }
+            });
+            
+            // iOS требует дополнительных обработчиков событий для сенсорных устройств
+            if (isIOS) {
+              closeButton.addEventListener('touchstart', function() {
+                this.style.opacity = '0.7';
+              });
+              closeButton.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+                if (tg && typeof tg.close === 'function') {
+                  tg.close();
+                }
+              });
+            }
+          }
         }
         
         // Функция скрытия экрана загрузки
@@ -295,6 +353,18 @@
             // Пытаемся монтировать Vue приложение с задержкой
             setTimeout(function() {
               vueApp.style.display = 'block';
+              
+              // iOS-специфичная подстройка скролла
+              if (isIOS) {
+                // Иногда для iOS требуется принудительно обновить область прокрутки
+                var content = document.querySelector('.content');
+                if (content) {
+                  content.style.overflow = 'hidden';
+                  setTimeout(function() {
+                    content.style.overflow = 'auto';
+                  }, 50);
+                }
+              }
               
               // Полностью удаляем экран загрузки после анимации
               setTimeout(function() {
@@ -324,10 +394,11 @@
             }
           }
           
-          // ВАЖНО: Принудительно скрываем экран загрузки через 1.5 секунды
+          // ВАЖНО: Принудительно скрываем экран загрузки через 1 секунду
+          // Для iOS делаем немного дольше
           setTimeout(function() {
             window.hideLoading();
-          }, 1500);
+          }, isIOS ? 1000 : 500);
         }, 100);
         
         // Дополнительная защита: скрываем экран загрузки при загрузке страницы
