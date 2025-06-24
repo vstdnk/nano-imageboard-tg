@@ -13,6 +13,9 @@
     <!-- Специфичные для iOS стили -->
     <meta name="format-detection" content="telephone=no">
     <meta name="apple-touch-fullscreen" content="yes">
+    <!-- Фиксация ориентации в портретном режиме -->
+    <meta name="screen-orientation" content="portrait">
+    <meta name="orientation" content="portrait">
     <link rel="apple-touch-icon" href="/webapp-tg-imgboard/apple-touch-icon.png">
     <link rel="manifest" href="/webapp-tg-imgboard/manifest.json">
     <title>TG Imgboard</title>
@@ -57,6 +60,9 @@
         padding: 0;
         margin: 0;
         overflow: hidden;
+        /* Блокировка смены ориентации */
+        position: fixed;
+        overscroll-behavior: none;
       }
       
       body {
@@ -72,6 +78,9 @@
         overflow: hidden;
         -webkit-text-size-adjust: 100%;
         -webkit-font-smoothing: antialiased;
+        /* Блокировка свайпа вниз */
+        touch-action: pan-x pan-y;
+        overscroll-behavior: none;
       }
       
       /* Специфичные стили для iOS в полноэкранном режиме */
@@ -168,23 +177,7 @@
         text-align: center;
       }
       
-      .back-button {
-        background: none;
-        border: none;
-        color: var(--tg-theme-button-color);
-        font-size: 18px;
-        padding: 8px;
-        cursor: pointer;
-        position: absolute;
-        left: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        -webkit-appearance: none;
-        appearance: none;
-      }
+      /* Удаляем стили кнопки назад, так как она больше не нужна */
       
       /* Полноэкранная кнопка */
       .fullscreen-button {
@@ -214,6 +207,8 @@
           -webkit-overflow-scrolling: touch;
           position: relative;
           z-index: 1;
+          /* Блокировка свайпа вниз */
+          overscroll-behavior: none;
         }
         
         /* Для iOS в полноэкранном режиме */
@@ -229,6 +224,8 @@
           height: calc(100% - 49px - var(--safe-area-inset-top));
           overflow-y: auto;
           -webkit-overflow-scrolling: touch;
+          /* Блокировка свайпа вниз */
+          overscroll-behavior: none;
         }
       }
       
@@ -267,7 +264,7 @@
         line-height: 1.5;
       }
     </style>
-    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-3gLjB2Dm.js"></script>
+    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-DYOvnCP2.js"></script>
     <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-DcIFoIXr.css">
   </head>
   <body>
@@ -280,9 +277,7 @@
     <!-- Базовый интерфейс приложения - будет виден даже без Vue -->
     <div id="basic-app" style="display: none; height: 100%; overflow: hidden;">
       <div class="header">
-        <button class="back-button" id="close-app">
-          <span>&larr;</span>
-        </button>
+        <!-- Удаляем кнопку возврата слева сверху -->
         <h1>TG Imgboard</h1>
         <button class="fullscreen-button" id="fullscreen-app">
           <span>⤢</span>
@@ -333,13 +328,48 @@
         var vueApp = document.getElementById('app');
         var isAppHidden = false;
         
+        // Блокировка свайпа вниз
+        document.addEventListener('touchstart', function(e) {
+          if (e.touches.length > 1) {
+            e.preventDefault();
+          }
+        }, { passive: false });
+        
+        // Блокировка смены ориентации
+        window.addEventListener('orientationchange', function(e) {
+          if (window.orientation !== 0 && window.orientation !== undefined) {
+            // Попытка вернуться к портретной ориентации
+            try {
+              window.screen.orientation.lock('portrait');
+            } catch (err) {
+              console.error('Ошибка блокировки ориентации:', err);
+            }
+          }
+        });
+        
+        // Попытка заблокировать ориентацию в портретном режиме
+        try {
+          if (window.screen && window.screen.orientation) {
+            window.screen.orientation.lock('portrait').catch(function(err) {
+              console.error('Ошибка блокировки ориентации:', err);
+            });
+          }
+        } catch (err) {
+          console.error('Ошибка блокировки ориентации:', err);
+        }
+        
         // Настраиваем для iOS
         if (isIOS) {
           document.body.classList.add('ios');
+          document.body.classList.add('ios-fullscreen');
           
-          // Специальные настройки для iOS полноэкранного режима
-          // Предотвращаем скроллинг страницы целиком на iOS
+          // Блокировка свайпа вниз на iOS
           document.addEventListener('touchmove', function(event) {
+            // Определяем направление движения
+            if (event.touches && event.touches.length && event.touches[0].clientY < 0) {
+              event.preventDefault();
+            }
+            
             // Разрешаем скроллинг только внутри элементов с классом content
             if (!event.target.closest('.content')) {
               event.preventDefault();
@@ -368,28 +398,7 @@
             document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
           }
           
-          // Обработчик для кнопки закрытия
-          var closeButton = document.getElementById('close-app');
-          if (closeButton) {
-            closeButton.addEventListener('click', function() {
-              if (tg && typeof tg.close === 'function') {
-                tg.close();
-              }
-            });
-            
-            // iOS требует дополнительных обработчиков событий для сенсорных устройств
-            if (isIOS) {
-              closeButton.addEventListener('touchstart', function() {
-                this.style.opacity = '0.7';
-              });
-              closeButton.addEventListener('touchend', function() {
-                this.style.opacity = '1';
-                if (tg && typeof tg.close === 'function') {
-                  tg.close();
-                }
-              });
-            }
-          }
+          // Удаляем обработчик для кнопки закрытия, так как мы удалили эту кнопку
           
           // Обработчик для кнопки полного экрана
           var fullscreenButton = document.getElementById('fullscreen-app');
@@ -459,9 +468,14 @@
             }
           }
           
-          // Попытка включить полноэкранный режим сразу при загрузке
+          // Автоматическая активация полноэкранного режима сразу при загрузке
           setTimeout(function() {
             try {
+              // Эмулируем клик по кнопке "⤢" для активации полноэкранного режима
+              if (fullscreenButton) {
+                fullscreenButton.click();
+              }
+              
               if (isIOS) {
                 // Для iOS добавляем класс ios-fullscreen для стилизации
                 document.body.classList.add('ios-fullscreen');
@@ -482,6 +496,19 @@
                   if (typeof tg.expand === 'function') {
                     tg.expand();
                   }
+                  
+                  // Пробуем еще методы на iOS
+                  try {
+                    // Имитация эффекта полного экрана
+                    document.documentElement.style.height = '100%';
+                    document.body.style.height = '100%';
+                    document.body.style.position = 'fixed';
+                    document.body.style.top = '0';
+                    document.body.style.left = '0';
+                    document.body.style.width = '100%';
+                  } catch (e) {
+                    console.error('Ошибка при настройке стилей полного экрана:', e);
+                  }
                 }, 1500);
               } else {
                 // Для других платформ
@@ -494,7 +521,7 @@
             } catch (e) {
               console.error('Ошибка при активации полноэкранного режима:', e);
             }
-          }, isIOS ? 1000 : 500);
+          }, isIOS ? 500 : 300);
         }
         
         // Функция скрытия экрана загрузки
