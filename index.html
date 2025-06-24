@@ -474,61 +474,52 @@
           // Автоматически активируем полноэкранный режим при загрузке
           setTimeout(function() {
             try {
-              // Активируем функционал полноэкранной кнопки
-              if (isIOS) {
-                // Специальный подход для iOS
-                document.body.classList.add('ios-fullscreen');
+              // Эмулируем нажатие кнопки полноэкранного режима
+              var fullscreenButton = document.getElementById('fullscreen-app');
+              if (fullscreenButton) {
+                // Программно вызываем клик на кнопке полноэкранного режима
+                console.log('Эмулируем нажатие кнопки полноэкранного режима');
                 
-                // Используем несколько методов для полноэкранного режима на iOS
-                // Если метод requestFullscreen доступен
-                if (typeof tg.requestFullscreen === 'function') {
-                  tg.requestFullscreen();
-                }
-                    
-                // В любом случае используем expand для iOS
-                if (typeof tg.expand === 'function') {
-                  tg.expand();
+                // Визуальная обратная связь (как при нажатии)
+                if (isIOS) {
+                  fullscreenButton.style.opacity = '0.7';
+                  setTimeout(function() {
+                    fullscreenButton.style.opacity = '1';
+                  }, 100);
                 }
                 
-                // Дополнительно для iOS устанавливаем специфичные стили
+                // Вызываем событие клика на кнопке
+                var clickEvent = new MouseEvent('click', {
+                  bubbles: true,
+                  cancelable: true,
+                  view: window
+                });
+                fullscreenButton.dispatchEvent(clickEvent);
+                
+                // Для iOS дополнительно эмулируем touch событие
+                if (isIOS) {
+                  // Эмулируем touchend событие, которое обрабатывается в обработчике кнопки
+                  var touchEndEvent = new Event('touchend', {
+                    bubbles: true,
+                    cancelable: true
+                  });
+                  fullscreenButton.dispatchEvent(touchEndEvent);
+                }
+                
+                // Прямой вызов функции toggleFullScreen для большей надежности
                 setTimeout(function() {
-                  // Устанавливаем viewport на полный размер
-                  var viewportMeta = document.querySelector('meta[name="viewport"]');
-                  if (viewportMeta) {
-                    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui');
+                  if (typeof toggleFullScreen === 'function') {
+                    console.log('Прямой вызов функции toggleFullScreen');
+                    toggleFullScreen();
                   }
-                  
-                  // Обновляем скролл в контентной области
-                  var content = document.querySelector('.content');
-                  if (content) {
-                    content.style.overflow = 'hidden';
-                    setTimeout(function() {
-                      content.style.overflow = 'auto';
-                    }, 50);
-                  }
-                  
-                  // Повторно вызываем для надежности
-                  if (typeof tg.expand === 'function') {
-                    tg.expand();
-                  }
-                  if (typeof tg.requestFullscreen === 'function') {
-                    tg.requestFullscreen();
-                  }
-                }, 300);
+                }, 200);
               } else {
-                // Для других платформ используем стандартный подход
-                if (tg && typeof tg.requestFullscreen === 'function') {
-                  tg.requestFullscreen();
-                } else if (tg && typeof tg.expand === 'function') {
-                  tg.expand();
-                }
+                console.error('Кнопка полноэкранного режима не найдена');
               }
-              
-              console.log('Автоматически активирован полноэкранный режим');
             } catch (e) {
-              console.error('Ошибка при активации полноэкранного режима:', e);
+              console.error('Ошибка при эмуляции нажатия кнопки полноэкранного режима:', e);
             }
-          }, isIOS ? 500 : 300);
+          }, isIOS ? 800 : 500);
         }
         
         // Функция скрытия экрана загрузки
@@ -582,6 +573,50 @@
               // Принудительно устанавливаем полноэкранный режим
               document.documentElement.style.height = '100%';
               document.body.style.height = '100%';
+              
+              // Функция для периодической активации полноэкранного режима
+              var attemptCount = 0;
+              var maxAttempts = 5;
+              var attemptInterval = isIOS ? 1000 : 500;
+              
+              function attemptFullscreen() {
+                if (attemptCount >= maxAttempts) return;
+                
+                attemptCount++;
+                console.log('Попытка активации полноэкранного режима #' + attemptCount);
+                
+                try {
+                  // Эмулируем нажатие кнопки полноэкранного режима
+                  var fullscreenButton = document.getElementById('fullscreen-app');
+                  if (fullscreenButton && typeof toggleFullScreen === 'function') {
+                    toggleFullScreen();
+                  }
+                  
+                  // Дополнительно используем прямые методы
+                  if (window.Telegram && window.Telegram.WebApp) {
+                    var tgApp = window.Telegram.WebApp;
+                    if (typeof tgApp.requestFullscreen === 'function') {
+                      tgApp.requestFullscreen();
+                    }
+                    if (typeof tgApp.expand === 'function') {
+                      tgApp.expand();
+                    }
+                  }
+                  
+                  // Для iOS добавляем специальный класс
+                  if (isIOS) {
+                    document.body.classList.add('ios-fullscreen');
+                  }
+                } catch (e) {
+                  console.error('Ошибка при попытке активации полноэкранного режима:', e);
+                }
+                
+                // Планируем следующую попытку
+                setTimeout(attemptFullscreen, attemptInterval);
+              }
+              
+              // Запускаем первую попытку с небольшой задержкой
+              setTimeout(attemptFullscreen, attemptInterval);
             } catch (e) {
               console.error('Ошибка при инициализации Telegram WebApp:', e);
             }
@@ -598,6 +633,28 @@
         window.addEventListener('load', function() {
           setTimeout(function() {
             window.hideLoading();
+            
+            // Дополнительная проверка полноэкранного режима
+            setTimeout(function() {
+              try {
+                if (isIOS) {
+                  // Принудительно активируем полноэкранный режим еще раз
+                  document.body.classList.add('ios-fullscreen');
+                  
+                  if (tg && typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  }
+                  
+                  if (tg && typeof tg.expand === 'function') {
+                    tg.expand();
+                  }
+                  
+                  console.log('Дополнительная активация полноэкранного режима для iOS');
+                }
+              } catch (e) {
+                console.error('Ошибка при дополнительной активации полноэкранного режима:', e);
+              }
+            }, 1000);
           }, 500);
         });
       });
