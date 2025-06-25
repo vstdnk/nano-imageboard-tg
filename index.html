@@ -304,8 +304,8 @@
         border-top-color: var(--tg-theme-button-color);
       }
     </style>
-    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-BYsZT7GY.js"></script>
-    <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-7Wij1rAw.css">
+    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-InJldeqE.js"></script>
+    <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-DQvo0kkM.css">
   </head>
   <body>
     <!-- Базовый экран загрузки -->
@@ -559,12 +559,20 @@
                 // Добавляем обработчик клика
                 boardItem.addEventListener('click', function() {
                   var boardId = this.getAttribute('data-id');
+                  var boardName = this.querySelector('.board-name').textContent;
+                  
+                  // Сохраняем информацию о доске в localStorage
+                  localStorage.setItem('boardInfo_' + boardId, JSON.stringify({
+                    id: boardId,
+                    name: boardName
+                  }));
+                  
                   // Показываем небольшую анимацию нажатия
                   this.style.backgroundColor = 'rgba(0,0,0,0.05)';
                   setTimeout(() => {
                     this.style.backgroundColor = '';
-                    // Открываем доску в новом окне или вкладке
-                    window.open('https://2ch.hk/' + boardId + '/', '_blank');
+                    // Переходим на страницу доски в нашем приложении
+                    window.location.href = '#/board/' + boardId;
                   }, 150);
                 });
               });
