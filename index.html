@@ -174,43 +174,6 @@
         text-align: center;
       }
       
-      .back-button {
-        background: none;
-        border: none;
-        color: var(--tg-theme-button-color);
-        font-size: 18px;
-        padding: 8px;
-        cursor: pointer;
-        position: absolute;
-        left: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        -webkit-appearance: none;
-        appearance: none;
-      }
-      
-      /* Полноэкранная кнопка */
-      .fullscreen-button {
-        background: none;
-        border: none;
-        color: var(--tg-theme-button-color);
-        font-size: 18px;
-        padding: 8px;
-        cursor: pointer;
-        position: absolute;
-        right: 8px;
-        top: 50%;
-        transform: translateY(-50%);
-        z-index: 10;
-        display: flex;
-        align-items: center;
-        -webkit-appearance: none;
-        appearance: none;
-      }
-      
       /* Специфичные для iOS стили */
       @supports (-webkit-touch-callout: none) {
         .content {
@@ -238,70 +201,49 @@
         }
       }
       
-      .welcome-text {
-        margin-bottom: 24px;
-        font-size: 18px;
-        text-align: center;
-        padding: 20px 16px 0;
-      }
-      
-      /* Стили для секций */
-      .section {
-        padding: 20px 16px;
-        margin-bottom: 1px;
-      }
-      
-      .section-title {
-        font-size: 16px;
-        font-weight: bold;
-        margin-bottom: 12px;
-        color: var(--tg-theme-text-color);
-      }
-      
-      .section-content {
-        background-color: var(--tg-theme-secondary-bg-color);
-        border-radius: 12px;
-        padding: 16px;
-        min-height: 120px;
-        -webkit-transform: translateZ(0);
-        transform: translateZ(0);
-      }
-      
-      .section-content p {
-        color: var(--tg-theme-hint-color);
-        font-size: 14px;
-        line-height: 1.5;
-      }
-      
       /* Стили для списка досок */
       .boards-list {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-        gap: 10px;
-        margin-bottom: 10px;
+        display: flex;
+        flex-direction: column;
+        margin-bottom: 0;
       }
       
       .board-item {
-        background-color: var(--tg-theme-button-color);
-        color: var(--tg-theme-button-text-color);
-        padding: 10px 8px;
-        border-radius: 12px;
-        font-size: 14px;
-        font-weight: 500;
+        padding: 14px 16px;
+        font-size: 16px;
+        font-weight: 400;
         cursor: pointer;
-        transition: all 0.2s ease;
-        text-align: center;
-        box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        min-height: 50px;
+        transition: background-color 0.2s ease;
+        text-align: left;
+        color: var(--tg-theme-text-color);
+        border-bottom: 1px solid rgba(0,0,0,0.05);
+        position: relative;
+      }
+      
+      html.dark .board-item {
+        border-bottom-color: rgba(255,255,255,0.05);
+      }
+      
+      .board-item:last-child {
+        border-bottom: none;
       }
       
       .board-item:active {
-        transform: scale(0.97);
-        opacity: 0.8;
-        box-shadow: 0 1px 2px rgba(0,0,0,0.1);
+        background-color: rgba(0,0,0,0.05);
+      }
+      
+      html.dark .board-item:active {
+        background-color: rgba(255,255,255,0.05);
+      }
+      
+      .board-item:after {
+        content: '›';
+        position: absolute;
+        right: 16px;
+        top: 50%;
+        transform: translateY(-50%);
+        font-size: 20px;
+        color: var(--tg-theme-hint-color);
       }
       
       .board-name {
@@ -309,22 +251,28 @@
         overflow: hidden;
         text-overflow: ellipsis;
         display: block;
+        padding-right: 20px;
       }
       
       /* Улучшенные стили для секций */
       .section {
-        margin-bottom: 20px;
+        margin-bottom: 24px;
       }
       
       .section-title {
-        font-size: 18px;
-        font-weight: bold;
-        margin: 16px 16px 12px;
-        color: var(--tg-theme-text-color);
+        font-size: 15px;
+        font-weight: 500;
+        margin: 16px 16px 8px;
+        color: var(--tg-theme-hint-color);
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
       }
       
       .section-content {
-        padding: 0 16px;
+        background-color: var(--tg-theme-secondary-bg-color);
+        border-radius: 10px;
+        overflow: hidden;
+        margin: 0 16px;
       }
       
       /* Стили для приветственного текста */
@@ -480,8 +428,6 @@
             document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
           }
           
-          // Кнопка закрытия удалена
-          
           // Функция активации полноэкранного режима
           var toggleFullScreen = function() {
             try {
@@ -526,12 +472,6 @@
             }
           };
 
-          // Кнопка полного экрана больше не нужна
-          var fullscreenButton = document.getElementById('fullscreen-app');
-          if (fullscreenButton && fullscreenButton.parentNode) {
-            fullscreenButton.parentNode.removeChild(fullscreenButton);
-          }
-          
           // Автоматически активируем полноэкранный режим при загрузке
           // Функция активации полноэкранного режима с повторами
           var activateFullScreenMode = function(attempts) {
@@ -584,90 +524,6 @@
             var welcomeText = document.querySelector('.welcome-text');
             var boardsContainer = document.getElementById('boards-container');
             
-            // Создаем стили для досок
-            var style = document.createElement('style');
-            style.textContent = `
-              .boards-list {
-                display: grid;
-                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-                gap: 10px;
-                margin-bottom: 10px;
-              }
-              
-              .board-item {
-                background-color: var(--tg-theme-button-color);
-                color: var(--tg-theme-button-text-color);
-                padding: 10px 8px;
-                border-radius: 12px;
-                font-size: 14px;
-                font-weight: 500;
-                cursor: pointer;
-                transition: all 0.2s ease;
-                text-align: center;
-                box-shadow: 0 2px 4px rgba(0,0,0,0.1);
-                display: flex;
-                flex-direction: column;
-                justify-content: center;
-                min-height: 50px;
-              }
-              
-              .board-item:active {
-                transform: scale(0.97);
-                opacity: 0.8;
-                box-shadow: 0 1px 2px rgba(0,0,0,0.1);
-              }
-              
-              .board-name {
-                white-space: nowrap;
-                overflow: hidden;
-                text-overflow: ellipsis;
-                display: block;
-              }
-              
-              .section {
-                margin-bottom: 20px;
-              }
-              
-              .section-title {
-                font-size: 18px;
-                font-weight: bold;
-                margin: 16px 16px 12px;
-                color: var(--tg-theme-text-color);
-              }
-              
-              .section-content {
-                padding: 0 16px;
-              }
-              
-              .welcome-text {
-                margin: 20px 16px;
-                font-size: 18px;
-                text-align: center;
-                color: var(--tg-theme-text-color);
-                font-weight: 500;
-                display: flex;
-                flex-direction: column;
-                align-items: center;
-                gap: 10px;
-              }
-              
-              .loader {
-                width: 24px;
-                height: 24px;
-                border: 3px solid rgba(0,0,0,0.1);
-                border-radius: 50%;
-                border-top-color: var(--tg-theme-button-color);
-                animation: spin 1s linear infinite;
-                margin-top: 8px;
-              }
-              
-              html.dark .loader {
-                border-color: rgba(255,255,255,0.1);
-                border-top-color: var(--tg-theme-button-color);
-              }
-            `;
-            document.head.appendChild(style);
-            
             // Показываем индикатор загрузки
             welcomeText.innerHTML = 'Загрузка списка досок... <div class="loader"></div>';
             
@@ -704,9 +560,9 @@
                 boardItem.addEventListener('click', function() {
                   var boardId = this.getAttribute('data-id');
                   // Показываем небольшую анимацию нажатия
-                  this.style.transform = 'scale(0.95)';
+                  this.style.backgroundColor = 'rgba(0,0,0,0.05)';
                   setTimeout(() => {
-                    this.style.transform = '';
+                    this.style.backgroundColor = '';
                     // Открываем доску в новом окне или вкладке
                     window.open('https://2ch.hk/' + boardId + '/', '_blank');
                   }, 150);
@@ -784,132 +640,6 @@
               .catch(function(error) {
                 console.error('Ошибка при загрузке досок:', error);
                 welcomeText.innerHTML = 'Ошибка при загрузке досок.<br>Попробуйте позже.';
-                
-                // Скрываем экран загрузки даже при ошибке
-                setTimeout(function() {
-                  window.hideLoading();
-                }, 300);
-              });
-          }
-          
-          // Запускаем загрузку досок
-          loadBoards();
-          function loadBoards() {
-            var welcomeText = document.querySelector('.welcome-text');
-            var boardsContainer = document.getElementById('boards-container');
-            
-            // Показываем индикатор загрузки
-            welcomeText.innerHTML = 'Загрузка списка досок... <div class="loader"></div>';
-            
-            // Функция для создания секции с досками
-            function createBoardSection(category, boards) {
-              var section = document.createElement('div');
-              section.className = 'section';
-              
-              var title = document.createElement('div');
-              title.className = 'section-title';
-              title.textContent = category;
-              section.appendChild(title);
-              
-              var content = document.createElement('div');
-              content.className = 'section-content';
-              
-              // Создаем список досок
-              var boardsList = document.createElement('div');
-              boardsList.className = 'boards-list';
-              
-              boards.forEach(function(board) {
-                var boardItem = document.createElement('div');
-                boardItem.className = 'board-item';
-                boardItem.setAttribute('data-id', board.id);
-                
-                var boardName = document.createElement('span');
-                boardName.className = 'board-name';
-                boardName.textContent = '/' + board.id + '/ - ' + board.name;
-                
-                boardItem.appendChild(boardName);
-                boardsList.appendChild(boardItem);
-                
-                // Добавляем обработчик клика
-                boardItem.addEventListener('click', function() {
-                  var boardId = this.getAttribute('data-id');
-                  // Показываем небольшую анимацию нажатия
-                  this.style.transform = 'scale(0.95)';
-                  setTimeout(() => {
-                    this.style.transform = '';
-                    // Открываем доску в новом окне или вкладке
-                    window.open('https://2ch.hk/' + boardId + '/', '_blank');
-                  }, 150);
-                });
-              });
-              
-              content.appendChild(boardsList);
-              section.appendChild(content);
-              
-              return section;
-            }
-            
-                         // Загружаем данные из локального JSON-файла
-             fetch('./boards.json')
-               .then(function(response) {
-                 if (!response.ok) {
-                   throw new Error('Ошибка загрузки данных: ' + response.status);
-                 }
-                 return response.json();
-               })
-              .then(function(data) {
-                // Очищаем текст загрузки
-                welcomeText.textContent = 'Выберите доску:';
-                
-                                 // Группируем доски по категориям
-                 var categories = {};
-                 
-                 data.boards.forEach(function(board) {
-                   var category = board.category;
-                   if (!categories[category]) {
-                     categories[category] = [];
-                   }
-                   categories[category].push(board);
-                 });
-                 
-                 // Сортируем категории в определенном порядке
-                 var categoryOrder = [
-                   "Тематика", 
-                   "Японская культура", 
-                   "Технологии", 
-                   "Творчество", 
-                   "Развлечения", 
-                   "Медиа", 
-                   "Политика", 
-                   "Разное", 
-                   "Взрослый контент"
-                 ];
-                 
-                 // Сортируем доски внутри категорий по алфавиту
-                 for (var category in categories) {
-                   if (categories.hasOwnProperty(category)) {
-                     categories[category].sort(function(a, b) {
-                       return a.name.localeCompare(b.name, 'ru');
-                     });
-                   }
-                 }
-                 
-                 // Создаем секции в нужном порядке
-                 categoryOrder.forEach(function(category) {
-                   if (categories[category]) {
-                     var section = createBoardSection(category, categories[category]);
-                     boardsContainer.appendChild(section);
-                   }
-                 });
-                
-                // Скрываем экран загрузки
-                setTimeout(function() {
-                  window.hideLoading();
-                }, 300);
-              })
-              .catch(function(error) {
-                console.error('Ошибка при загрузке досок:', error);
-                welcomeText.textContent = 'Ошибка при загрузке досок. Попробуйте позже.';
                 
                 // Скрываем экран загрузки даже при ошибке
                 setTimeout(function() {
