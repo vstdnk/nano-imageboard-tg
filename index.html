@@ -575,12 +575,8 @@
               return section;
             }
             
-            // Используем CORS Proxy для обхода ограничений
-            var corsProxyUrl = 'https://corsproxy.io/?';
-            var apiUrl = 'https://2ch.hk/api/mobile/v2/boards';
-            
-            // Загружаем данные через CORS Proxy
-            fetch(corsProxyUrl + encodeURIComponent(apiUrl))
+            // Загружаем данные из локального JSON файла
+            fetch('./boards.json')
               .then(function(response) {
                 if (!response.ok) {
                   throw new Error('Ошибка загрузки данных: ' + response.status);
