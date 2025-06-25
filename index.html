@@ -266,231 +266,9 @@
         font-size: 14px;
         line-height: 1.5;
       }
-      
-      /* Стили для списка досок */
-      .boards-list {
-        display: flex;
-        flex-direction: column;
-        gap: 4px;
-      }
-      
-      .board-item {
-        padding: 2px 0;
-      }
-      
-      .board-link {
-        color: var(--tg-theme-link-color);
-        text-decoration: none;
-        display: block;
-        padding: 10px;
-        font-size: 14px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-        background-color: rgba(var(--tg-theme-bg-color-rgb, 255, 255, 255), 0.5);
-        border-radius: 8px;
-        transition: background-color 0.2s;
-      }
-      
-      .board-link:active {
-        background-color: rgba(var(--tg-theme-secondary-bg-color-rgb, 240, 240, 240), 0.8);
-      }
-      
-      .board-name {
-        font-weight: 500;
-        margin-bottom: 3px;
-      }
-      
-      .board-id {
-        font-weight: 700;
-        color: var(--tg-theme-button-color);
-      }
-      
-      .board-info {
-        font-size: 12px;
-        color: var(--tg-theme-hint-color);
-        white-space: nowrap;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      
-      .loading-boards {
-        display: flex;
-        flex-direction: column;
-        align-items: center;
-        justify-content: center;
-        padding: 40px 20px;
-        color: var(--tg-theme-hint-color);
-      }
-      
-      .error-message {
-        padding: 20px;
-        color: #ff3b30;
-        text-align: center;
-      }
-      
-      .cache-warning {
-        padding: 12px 16px;
-        margin-bottom: 16px;
-        background-color: rgba(255, 204, 0, 0.1);
-        border-left: 3px solid #ffcc00;
-        color: var(--tg-theme-hint-color);
-        font-size: 13px;
-        text-align: center;
-        border-radius: 8px;
-      }
-      
-      /* Дополнительные стили для темной темы */
-      html.dark .board-link {
-        border-bottom-color: rgba(255, 255, 255, 0.05);
-      }
-      
-      /* Стили для модального окна */
-      .modal-overlay {
-        position: fixed;
-        top: 0;
-        left: 0;
-        right: 0;
-        bottom: 0;
-        background-color: rgba(0, 0, 0, 0.5);
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        z-index: 1000;
-        animation: fadeIn 0.2s ease-out;
-      }
-      
-      .modal-content {
-        background-color: var(--tg-theme-bg-color);
-        border-radius: 12px;
-        width: 90%;
-        max-width: 400px;
-        max-height: 90vh;
-        overflow: hidden;
-        display: flex;
-        flex-direction: column;
-        animation: slideUp 0.3s ease-out;
-        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
-      }
-      
-      .modal-header {
-        padding: 16px;
-        border-bottom: 1px solid rgba(0, 0, 0, 0.1);
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-      }
-      
-      .modal-header h3 {
-        margin: 0;
-        font-size: 18px;
-        font-weight: 600;
-        color: var(--tg-theme-text-color);
-      }
-      
-      .modal-close {
-        background: none;
-        border: none;
-        font-size: 24px;
-        cursor: pointer;
-        color: var(--tg-theme-hint-color);
-        padding: 0;
-        width: 30px;
-        height: 30px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        border-radius: 50%;
-        transition: background-color 0.2s;
-      }
-      
-      .modal-close:active {
-        background-color: rgba(0, 0, 0, 0.05);
-      }
-      
-      .modal-body {
-        padding: 16px;
-        overflow-y: auto;
-        flex: 1;
-      }
-      
-      .board-details {
-        margin-top: 16px;
-        padding-top: 16px;
-        border-top: 1px solid rgba(0, 0, 0, 0.05);
-      }
-      
-      .board-details p {
-        margin: 8px 0;
-        font-size: 14px;
-        color: var(--tg-theme-text-color);
-      }
-      
-      .modal-actions {
-        padding: 16px;
-        display: flex;
-        justify-content: flex-end;
-        gap: 12px;
-        border-top: 1px solid rgba(0, 0, 0, 0.1);
-      }
-      
-      .modal-button {
-        padding: 10px 16px;
-        border-radius: 8px;
-        font-size: 14px;
-        font-weight: 500;
-        border: none;
-        cursor: pointer;
-        transition: opacity 0.2s;
-      }
-      
-      .modal-button:active {
-        opacity: 0.8;
-      }
-      
-      .modal-button.primary {
-        background-color: var(--tg-theme-button-color);
-        color: var(--tg-theme-button-text-color);
-      }
-      
-      .modal-button.secondary {
-        background-color: rgba(0, 0, 0, 0.05);
-        color: var(--tg-theme-text-color);
-      }
-      
-      /* Секции */
-      .section {
-        margin-bottom: 20px;
-        background-color: var(--tg-theme-bg-color);
-        border-radius: 12px;
-        overflow: hidden;
-        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-      }
-      
-      .section-header {
-        padding: 12px 16px;
-        font-weight: 600;
-        font-size: 16px;
-        color: var(--tg-theme-text-color);
-        background-color: var(--tg-theme-secondary-bg-color, rgba(0, 0, 0, 0.03));
-        border-bottom: 1px solid rgba(0, 0, 0, 0.05);
-      }
-      
-      .section-content {
-        padding: 12px 16px;
-      }
-      
-      /* Анимации */
-      @keyframes fadeIn {
-        from { opacity: 0; }
-        to { opacity: 1; }
-      }
-      
-      @keyframes slideUp {
-        from { transform: translateY(20px); opacity: 0; }
-        to { transform: translateY(0); opacity: 1; }
-      }
     </style>
-    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-s4g-lfmy.js"></script>
-    <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-CMHiCHCd.css">
+    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-BYsZT7GY.js"></script>
+    <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-7Wij1rAw.css">
   </head>
   <body>
     <!-- Базовый экран загрузки -->
@@ -510,14 +288,28 @@
       
       <div class="content">
         <p class="welcome-text">
-          Добро пожаловать в Telegram 2ch Imgboard!
+          Добро пожаловать в Telegram WebApp!
         </p>
         
-        <div id="boards-container">
-          <!-- Здесь будут отображаться разделы и доски -->
-          <div class="loading-boards">
-            <div class="spinner"></div>
-            <p>Загрузка списка досок...</p>
+        <!-- Три прокручиваемые секции -->
+        <div class="section">
+          <div class="section-title">Секция 1</div>
+          <div class="section-content">
+            <p>Это первая секция вашего приложения. Здесь может быть размещен любой контент, такой как изображения, текст или интерактивные элементы.</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Секция 2</div>
+          <div class="section-content">
+            <p>Вторая секция для другого контента. Вы можете добавить здесь свой специфический контент или функциональность для вашего приложения.</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Секция 3</div>
+          <div class="section-content">
+            <p>Третья секция завершает интерфейс. Это прокручиваемая панель, и вы можете добавить сколько угодно секций.</p>
           </div>
         </div>
       </div>
@@ -530,433 +322,6 @@
       // Определяем iOS устройства
       var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
       
-      // Функция для загрузки списка досок с API 2ch.hk
-      function loadBoards() {
-        var boardsContainer = document.getElementById('boards-container');
-        
-        // Отображаем индикатор загрузки
-        boardsContainer.innerHTML = '<div class="loading-boards"><div class="spinner"></div><p>Загрузка списка досок...</p></div>';
-        
-        // Проверяем кэш в localStorage
-        var cachedData = localStorage.getItem('2ch_boards_data');
-        var cachedTime = localStorage.getItem('2ch_boards_timestamp');
-        var currentTime = new Date().getTime();
-        
-        // Если есть кэш и он не старше 1 часа, используем его
-        if (cachedData && cachedTime && (currentTime - parseInt(cachedTime) < 3600000)) {
-          try {
-            var data = JSON.parse(cachedData);
-            renderBoards(data);
-            console.log('Данные загружены из кэша');
-            return;
-          } catch (e) {
-            console.error('Ошибка при чтении кэша:', e);
-            // Если ошибка при чтении кэша, продолжаем загрузку с сервера
-          }
-        }
-        
-        // Массив методов для загрузки данных
-        var methods = [
-          loadViaJSONP,
-          loadViaAllOrigins,
-          loadViaCorsAnywhere,
-          loadViaYQL,
-          loadViaDirect
-        ];
-        
-        // Запускаем первый метод
-        tryNextMethod(0);
-        
-        // Функция для последовательного перебора методов загрузки
-        function tryNextMethod(index) {
-          if (index >= methods.length) {
-            // Если все методы не сработали, пробуем использовать кэш
-            if (cachedData) {
-              try {
-                var oldData = JSON.parse(cachedData);
-                renderBoards(oldData);
-                console.log('Данные загружены из устаревшего кэша');
-                
-                // Показываем предупреждение о устаревших данных
-                var warning = document.createElement('div');
-                warning.className = 'cache-warning';
-                warning.textContent = 'Отображены сохраненные данные. Не удалось обновить информацию с сервера.';
-                var container = document.getElementById('boards-container');
-                if (container && container.firstChild) {
-                  container.insertBefore(warning, container.firstChild);
-                }
-                
-                return;
-              } catch (e) {
-                console.error('Ошибка при чтении устаревшего кэша:', e);
-              }
-            }
-            
-            // Если все методы не сработали и кэш недоступен, показываем ошибку
-            boardsContainer.innerHTML = '<div class="error-message"><p>Ошибка при загрузке списка досок. Пожалуйста, попробуйте позже.</p><button id="retry-button" class="modal-button primary">Повторить</button></div>';
-            
-            // Добавляем кнопку повтора
-            document.getElementById('retry-button').addEventListener('click', function() {
-              loadBoards();
-            });
-            return;
-          }
-          
-          // Запускаем текущий метод с таймаутом
-          var timeout = setTimeout(function() {
-            console.log('Таймаут для метода ' + index + ', пробуем следующий');
-            tryNextMethod(index + 1);
-          }, 5000);
-          
-          // Запускаем метод
-          methods[index](function(success, data) {
-            clearTimeout(timeout);
-            if (success) {
-              // Сохраняем данные в localStorage
-              localStorage.setItem('2ch_boards_data', JSON.stringify(data));
-              localStorage.setItem('2ch_boards_timestamp', currentTime.toString());
-              
-              // Отображаем данные
-              renderBoards(data);
-              console.log('Данные загружены методом ' + index);
-            } else {
-              // Если метод не сработал, пробуем следующий
-              tryNextMethod(index + 1);
-            }
-          });
-        }
-        
-        // Метод 1: JSONP
-        function loadViaJSONP(callback) {
-          console.log('Пробуем загрузить через JSONP');
-          var script = document.createElement('script');
-          
-          // Создаем уникальное имя функции обратного вызова
-          var callbackName = 'jsonp_callback_' + Math.round(100000 * Math.random());
-          window[callbackName] = function(data) {
-            delete window[callbackName];
-            document.body.removeChild(script);
-            callback(true, data);
-          };
-          
-          script.src = 'https://2ch.hk/api/mobile/v2/boards?callback=' + callbackName;
-          script.onerror = function() {
-            console.error('Ошибка при загрузке данных через JSONP');
-            if (document.body.contains(script)) {
-              document.body.removeChild(script);
-            }
-            callback(false);
-          };
-          
-          document.body.appendChild(script);
-        }
-        
-        // Метод 2: AllOrigins прокси
-        function loadViaAllOrigins(callback) {
-          console.log('Пробуем загрузить через AllOrigins');
-          var proxyUrl = 'https://api.allorigins.win/raw?url=';
-          var targetUrl = encodeURIComponent('https://2ch.hk/api/mobile/v2/boards');
-          
-          fetch(proxyUrl + targetUrl)
-            .then(function(response) {
-              if (!response.ok) {
-                throw new Error('Ошибка при загрузке данных через прокси: ' + response.status);
-              }
-              return response.json();
-            })
-            .then(function(data) {
-              callback(true, data);
-            })
-            .catch(function(error) {
-              console.error('Ошибка загрузки данных через AllOrigins:', error);
-              callback(false);
-            });
-        }
-        
-        // Метод 3: CORS Anywhere
-        function loadViaCorsAnywhere(callback) {
-          console.log('Пробуем загрузить через CORS Anywhere');
-          var corsAnywhereUrl = 'https://cors-anywhere.herokuapp.com/';
-          
-          fetch(corsAnywhereUrl + 'https://2ch.hk/api/mobile/v2/boards')
-            .then(function(response) {
-              if (!response.ok) {
-                throw new Error('Ошибка при загрузке данных через CORS Anywhere: ' + response.status);
-              }
-              return response.json();
-            })
-            .then(function(data) {
-              callback(true, data);
-            })
-            .catch(function(error) {
-              console.error('Ошибка загрузки данных через CORS Anywhere:', error);
-              callback(false);
-            });
-        }
-        
-        // Метод 4: Yahoo Query Language (YQL)
-        function loadViaYQL(callback) {
-          console.log('Пробуем загрузить через YQL');
-          var yqlURL = 'https://query.yahooapis.com/v1/public/yql';
-          var query = 'select * from json where url="https://2ch.hk/api/mobile/v2/boards"';
-          var fullUrl = yqlURL + '?q=' + encodeURIComponent(query) + '&format=json&callback=?';
-          
-          // Используем JSONP для YQL
-          var script = document.createElement('script');
-          var callbackName = 'yql_callback_' + Math.round(100000 * Math.random());
-          
-          window[callbackName] = function(data) {
-            delete window[callbackName];
-            document.body.removeChild(script);
-            if (data && data.query && data.query.results) {
-              callback(true, data.query.results);
-            } else {
-              callback(false);
-            }
-          };
-          
-          script.src = fullUrl.replace('callback=?', 'callback=' + callbackName);
-          script.onerror = function() {
-            console.error('Ошибка при загрузке данных через YQL');
-            if (document.body.contains(script)) {
-              document.body.removeChild(script);
-            }
-            callback(false);
-          };
-          
-          document.body.appendChild(script);
-        }
-        
-        // Метод 5: Прямой запрос с заголовками
-        function loadViaDirect(callback) {
-          console.log('Пробуем загрузить через прямой запрос');
-          
-          try {
-            var xhr = new XMLHttpRequest();
-            xhr.open('GET', 'https://2ch.hk/api/mobile/v2/boards', true);
-            
-            // Устанавливаем заголовки для обхода CORS
-            xhr.setRequestHeader('X-Requested-With', 'XMLHttpRequest');
-            xhr.setRequestHeader('Accept', 'application/json');
-            xhr.setRequestHeader('Origin', window.location.origin);
-            
-            xhr.onload = function() {
-              if (xhr.status >= 200 && xhr.status < 300) {
-                try {
-                  var data = JSON.parse(xhr.responseText);
-                  callback(true, data);
-                } catch (e) {
-                  console.error('Ошибка при парсинге JSON:', e);
-                  callback(false);
-                }
-              } else {
-                console.error('Ошибка при загрузке данных через прямой запрос:', xhr.status);
-                callback(false);
-              }
-            };
-            
-            xhr.onerror = function() {
-              console.error('Ошибка при загрузке данных через прямой запрос');
-              callback(false);
-            };
-            
-            xhr.send();
-          } catch (e) {
-            console.error('Исключение при прямом запросе:', e);
-            callback(false);
-          }
-        }
-      }
-      
-      // Функция для отображения досок
-      function renderBoards(data) {
-        var boardsContainer = document.getElementById('boards-container');
-        
-        // Проверяем структуру данных
-        if (!data || (!data.boards && !data.data)) {
-          boardsContainer.innerHTML = '<div class="error-message"><p>Ошибка в формате данных</p></div>';
-          return;
-        }
-        
-        // Нормализуем данные (API может возвращать разные структуры)
-        var boards = data.boards || data.data || [];
-        
-        // Группируем доски по категориям
-        var categories = {};
-        
-        // Перебираем все доски и группируем их по категориям
-        boards.forEach(function(board) {
-          // Проверяем наличие категории, если нет - используем "Другое"
-          var category = board.category || board.section || "Другое";
-          
-          if (!categories[category]) {
-            categories[category] = [];
-          }
-          categories[category].push(board);
-        });
-        
-        // Очищаем контейнер
-        boardsContainer.innerHTML = '';
-        
-        // Если нет категорий, показываем ошибку
-        if (Object.keys(categories).length === 0) {
-          boardsContainer.innerHTML = '<div class="error-message"><p>Список досок пуст</p></div>';
-          return;
-        }
-        
-        // Создаем секции для каждой категории
-        Object.keys(categories).sort().forEach(function(categoryName) {
-          var section = document.createElement('div');
-          section.className = 'section';
-          
-          var header = document.createElement('div');
-          header.className = 'section-header';
-          header.textContent = categoryName;
-          section.appendChild(header);
-          
-          var content = document.createElement('div');
-          content.className = 'section-content';
-          
-          var boardsList = document.createElement('div');
-          boardsList.className = 'boards-list';
-          
-          // Сортируем доски по имени
-          categories[categoryName].sort(function(a, b) {
-            return (a.name || a.id).localeCompare(b.name || b.id);
-          }).forEach(function(board) {
-            var boardItem = document.createElement('div');
-            boardItem.className = 'board-item';
-            
-            var boardLink = document.createElement('a');
-            boardLink.className = 'board-link';
-            boardLink.href = 'javascript:void(0);';
-            
-            // Обработчик клика по доске
-            boardLink.addEventListener('click', function() {
-              showBoardInfo(board);
-            });
-            
-            var boardName = document.createElement('div');
-            boardName.className = 'board-name';
-            boardName.innerHTML = '<span class="board-id">/' + (board.id || '') + '/</span> ' + (board.name || board.id || 'Без названия');
-            boardLink.appendChild(boardName);
-            
-            var boardInfo = document.createElement('div');
-            boardInfo.className = 'board-info';
-            boardInfo.textContent = board.info || board.description || '';
-            boardLink.appendChild(boardInfo);
-            
-            boardItem.appendChild(boardLink);
-            boardsList.appendChild(boardItem);
-          });
-          
-          content.appendChild(boardsList);
-          section.appendChild(content);
-          boardsContainer.appendChild(section);
-        });
-      }
-      
-      // Функция для отображения информации о доске
-      function showBoardInfo(board) {
-        // Создаем модальное окно
-        var modal = document.createElement('div');
-        modal.className = 'modal-overlay';
-        
-        var modalContent = document.createElement('div');
-        modalContent.className = 'modal-content';
-        
-        var modalHeader = document.createElement('div');
-        modalHeader.className = 'modal-header';
-        
-        var modalTitle = document.createElement('h3');
-        modalTitle.innerHTML = '<span class="board-id">/' + (board.id || '') + '/</span> ' + (board.name || board.id || 'Без названия');
-        modalHeader.appendChild(modalTitle);
-        
-        var closeButton = document.createElement('button');
-        closeButton.className = 'modal-close';
-        closeButton.innerHTML = '&times;';
-        closeButton.addEventListener('click', function() {
-          document.body.removeChild(modal);
-        });
-        modalHeader.appendChild(closeButton);
-        
-        modalContent.appendChild(modalHeader);
-        
-        var modalBody = document.createElement('div');
-        modalBody.className = 'modal-body';
-        
-        // Добавляем информацию о доске
-        var info = document.createElement('p');
-        info.textContent = board.info || board.description || 'Нет описания';
-        modalBody.appendChild(info);
-        
-        // Добавляем дополнительную информацию
-        var details = document.createElement('div');
-        details.className = 'board-details';
-        
-        if (board.threads_per_page) {
-          var threadsInfo = document.createElement('p');
-          threadsInfo.innerHTML = '<strong>Тредов на странице:</strong> ' + board.threads_per_page;
-          details.appendChild(threadsInfo);
-        }
-        
-        if (board.bump_limit) {
-          var bumpInfo = document.createElement('p');
-          bumpInfo.innerHTML = '<strong>Бамп-лимит:</strong> ' + board.bump_limit;
-          details.appendChild(bumpInfo);
-        }
-        
-        if (board.max_pages) {
-          var pagesInfo = document.createElement('p');
-          pagesInfo.innerHTML = '<strong>Максимум страниц:</strong> ' + board.max_pages;
-          details.appendChild(pagesInfo);
-        }
-        
-        if (board.category || board.section) {
-          var categoryInfo = document.createElement('p');
-          categoryInfo.innerHTML = '<strong>Категория:</strong> ' + (board.category || board.section);
-          details.appendChild(categoryInfo);
-        }
-        
-        modalBody.appendChild(details);
-        
-        // Добавляем кнопки действий
-        var actions = document.createElement('div');
-        actions.className = 'modal-actions';
-        
-        var openButton = document.createElement('button');
-        openButton.className = 'modal-button primary';
-        openButton.textContent = 'Открыть доску';
-        openButton.addEventListener('click', function() {
-          // Здесь будет код для открытия доски
-          alert('Функционал открытия доски будет добавлен позже');
-          document.body.removeChild(modal);
-        });
-        actions.appendChild(openButton);
-        
-        var cancelButton = document.createElement('button');
-        cancelButton.className = 'modal-button secondary';
-        cancelButton.textContent = 'Закрыть';
-        cancelButton.addEventListener('click', function() {
-          document.body.removeChild(modal);
-        });
-        actions.appendChild(cancelButton);
-        
-        modalBody.appendChild(actions);
-        
-        modalContent.appendChild(modalBody);
-        modal.appendChild(modalContent);
-        
-        // Добавляем обработчик клика по оверлею
-        modal.addEventListener('click', function(e) {
-          if (e.target === modal) {
-            document.body.removeChild(modal);
-          }
-        });
-        
-        document.body.appendChild(modal);
-      }
-      
       // Базовая проверка наличия Telegram WebApp API
       window.addEventListener('DOMContentLoaded', function() {
         // Элементы страницы
@@ -964,9 +329,6 @@
         var basicApp = document.getElementById('basic-app');
         var vueApp = document.getElementById('app');
         var isAppHidden = false;
-        
-        // Загружаем список досок
-        loadBoards();
         
         // Настраиваем для iOS
         if (isIOS) {
@@ -1109,16 +471,64 @@
             }
           }
           
-          // Попытка включить полноэкранный режим сразу при загрузке
+          // Автоматически активируем полноэкранный режим при загрузке
           setTimeout(function() {
             try {
-              // Вызываем функцию переключения полноэкранного режима
-              toggleFullScreen();
+              // Активируем функционал полноэкранной кнопки
+              if (isIOS) {
+                // Специальный подход для iOS
+                document.body.classList.add('ios-fullscreen');
+                
+                // Используем несколько методов для полноэкранного режима на iOS
+                // Если метод requestFullscreen доступен
+                if (typeof tg.requestFullscreen === 'function') {
+                  tg.requestFullscreen();
+                }
+                    
+                // В любом случае используем expand для iOS
+                if (typeof tg.expand === 'function') {
+                  tg.expand();
+                }
+                
+                // Дополнительно для iOS устанавливаем специфичные стили
+                setTimeout(function() {
+                  // Устанавливаем viewport на полный размер
+                  var viewportMeta = document.querySelector('meta[name="viewport"]');
+                  if (viewportMeta) {
+                    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui');
+                  }
+                  
+                  // Обновляем скролл в контентной области
+                  var content = document.querySelector('.content');
+                  if (content) {
+                    content.style.overflow = 'hidden';
+                    setTimeout(function() {
+                      content.style.overflow = 'auto';
+                    }, 50);
+                  }
+                  
+                  // Повторно вызываем для надежности
+                  if (typeof tg.expand === 'function') {
+                    tg.expand();
+                  }
+                  if (typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  }
+                }, 300);
+              } else {
+                // Для других платформ используем стандартный подход
+                if (tg && typeof tg.requestFullscreen === 'function') {
+                  tg.requestFullscreen();
+                } else if (tg && typeof tg.expand === 'function') {
+                  tg.expand();
+                }
+              }
+              
               console.log('Автоматически активирован полноэкранный режим');
             } catch (e) {
               console.error('Ошибка при активации полноэкранного режима:', e);
             }
-          }, isIOS ? 1000 : 500);
+          }, isIOS ? 500 : 300);
         }
         
         // Функция скрытия экрана загрузки
