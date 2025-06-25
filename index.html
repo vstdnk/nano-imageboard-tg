@@ -367,6 +367,16 @@
             console.error('Ошибка при отключении свайпа вниз:', e);
           }
           
+          // Скрываем кнопку "Назад" в левом верхнем углу
+          try {
+            if (window.Telegram && window.Telegram.WebApp && window.Telegram.WebApp.BackButton) {
+              window.Telegram.WebApp.BackButton.hide();
+              console.log('Кнопка "Назад" скрыта');
+            }
+          } catch (e) {
+            console.error('Ошибка при скрытии кнопки "Назад":', e);
+          }
+          
           // Блокировка ориентации экрана в портретном режиме
           try {
             if (window.Telegram && window.Telegram.WebApp) {
@@ -403,88 +413,21 @@
           
           // Кнопка закрытия удалена
           
-          // Обработчик для кнопки полного экрана
-          var fullscreenButton = document.getElementById('fullscreen-app');
-          if (fullscreenButton) {
-            // Функция переключения полноэкранного режима
-            var toggleFullScreen = function() {
-              try {
-                if (isIOS) {
-                  // Специальный подход для iOS
-                  document.body.classList.toggle('ios-fullscreen');
-                  
-                  // Используем несколько методов для полноэкранного режима на iOS
-                  if (tg.isExpanded) {
-                    // Если метод requestFullscreen доступен
-                    if (typeof tg.requestFullscreen === 'function') {
-                      tg.requestFullscreen();
-                    }
-                  }
-                  
-                  // В любом случае используем expand для iOS
-                  if (typeof tg.expand === 'function') {
-                    tg.expand();
-                  }
-                  
-                  // Дополнительно для iOS устанавливаем специфичные стили
-                  setTimeout(function() {
-                    // Устанавливаем viewport на полный размер
-                    var viewportMeta = document.querySelector('meta[name="viewport"]');
-                    if (viewportMeta) {
-                      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui');
-                    }
-                    
-                    // Обновляем скролл в контентной области
-                    var content = document.querySelector('.content');
-                    if (content) {
-                      content.style.overflow = 'hidden';
-                      setTimeout(function() {
-                        content.style.overflow = 'auto';
-                      }, 50);
-                    }
-                  }, 100);
-                } else {
-                  // Для других платформ используем стандартный подход
-                  if (tg && typeof tg.requestFullscreen === 'function') {
-                    tg.requestFullscreen();
-                  } else if (tg && typeof tg.expand === 'function') {
-                    // Если requestFullscreen не доступен, используем expand как запасной вариант
-                    tg.expand();
-                  }
-                }
-              } catch (e) {
-                console.error('Ошибка при переключении полноэкранного режима:', e);
-              }
-            };
-            
-            // Добавляем обработчики событий
-            fullscreenButton.addEventListener('click', toggleFullScreen);
-            
-            if (isIOS) {
-              fullscreenButton.addEventListener('touchstart', function() {
-                this.style.opacity = '0.7';
-              });
-              fullscreenButton.addEventListener('touchend', function() {
-                this.style.opacity = '1';
-                toggleFullScreen();
-              });
-            }
-          }
-          
-          // Автоматически активируем полноэкранный режим при загрузке
-          setTimeout(function() {
+          // Функция переключения полноэкранного режима (доступна глобально)
+          var toggleFullScreen = function() {
             try {
-              // Активируем функционал полноэкранной кнопки
               if (isIOS) {
                 // Специальный подход для iOS
-                document.body.classList.add('ios-fullscreen');
+                document.body.classList.toggle('ios-fullscreen');
                 
                 // Используем несколько методов для полноэкранного режима на iOS
-                // Если метод requestFullscreen доступен
-                if (typeof tg.requestFullscreen === 'function') {
-                  tg.requestFullscreen();
+                if (tg.isExpanded) {
+                  // Если метод requestFullscreen доступен
+                  if (typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  }
                 }
-                    
+                
                 // В любом случае используем expand для iOS
                 if (typeof tg.expand === 'function') {
                   tg.expand();
@@ -506,21 +449,93 @@
                       content.style.overflow = 'auto';
                     }, 50);
                   }
-                  
-                  // Повторно вызываем для надежности
-                  if (typeof tg.expand === 'function') {
-                    tg.expand();
-                  }
-                  if (typeof tg.requestFullscreen === 'function') {
-                    tg.requestFullscreen();
-                  }
-                }, 300);
+                }, 100);
               } else {
                 // Для других платформ используем стандартный подход
                 if (tg && typeof tg.requestFullscreen === 'function') {
                   tg.requestFullscreen();
                 } else if (tg && typeof tg.expand === 'function') {
+                  // Если requestFullscreen не доступен, используем expand как запасной вариант
                   tg.expand();
+                }
+              }
+            } catch (e) {
+              console.error('Ошибка при переключении полноэкранного режима:', e);
+            }
+          };
+
+          // Обработчик для кнопки полного экрана
+          var fullscreenButton = document.getElementById('fullscreen-app');
+          if (fullscreenButton) {
+            // Добавляем обработчики событий
+            fullscreenButton.addEventListener('click', toggleFullScreen);
+            
+            if (isIOS) {
+              fullscreenButton.addEventListener('touchstart', function() {
+                this.style.opacity = '0.7';
+              });
+              fullscreenButton.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+                toggleFullScreen();
+              });
+            }
+          }
+          
+          // Автоматически активируем полноэкранный режим при загрузке
+          setTimeout(function() {
+            try {
+              // Используем существующую функцию toggleFullScreen для активации полноэкранного режима
+              if (typeof toggleFullScreen === 'function') {
+                toggleFullScreen();
+                console.log('Автоматически активирован полноэкранный режим через toggleFullScreen');
+              } else {
+                // Резервный вариант, если toggleFullScreen не определена
+                if (isIOS) {
+                  // Специальный подход для iOS
+                  document.body.classList.add('ios-fullscreen');
+                  
+                  // Используем несколько методов для полноэкранного режима на iOS
+                  if (typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  }
+                      
+                  // В любом случае используем expand для iOS
+                  if (typeof tg.expand === 'function') {
+                    tg.expand();
+                  }
+                  
+                  // Дополнительно для iOS устанавливаем специфичные стили
+                  setTimeout(function() {
+                    // Устанавливаем viewport на полный размер
+                    var viewportMeta = document.querySelector('meta[name="viewport"]');
+                    if (viewportMeta) {
+                      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui');
+                    }
+                    
+                    // Обновляем скролл в контентной области
+                    var content = document.querySelector('.content');
+                    if (content) {
+                      content.style.overflow = 'hidden';
+                      setTimeout(function() {
+                        content.style.overflow = 'auto';
+                      }, 50);
+                    }
+                    
+                    // Повторно вызываем для надежности
+                    if (typeof tg.expand === 'function') {
+                      tg.expand();
+                    }
+                    if (typeof tg.requestFullscreen === 'function') {
+                      tg.requestFullscreen();
+                    }
+                  }, 300);
+                } else {
+                  // Для других платформ используем стандартный подход
+                  if (tg && typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  } else if (tg && typeof tg.expand === 'function') {
+                    tg.expand();
+                  }
                 }
               }
               
