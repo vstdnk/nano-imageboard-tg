@@ -1,63 +1,608 @@
 <!DOCTYPE html>
-<html lang="ru">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width,initial-scale=1.0,viewport-fit=cover">
-  <title>TG Imgboard</title>
-  <link rel="icon" href="/webapp-tg-imgboard/favicon.ico">
-  <script src="https://telegram.org/js/telegram-web-app.js"></script>
-  <style>
-    :root{--bg:#fff;--text:#222;--hint:#999;--link:#2678b6;--btn-bg:#2678b6;--btn-text:#fff;--sec-bg:#f5f5f5}
-    html.dark{--bg:#212121;--text:#fff;--hint:#aaa;--link:#8cc2ff;--sec-bg:#292929}
-    *{margin:0;padding:0;box-sizing:border-box;-webkit-tap-highlight-color:transparent}
-    html,body{width:100%;height:100%;overflow:hidden;font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:var(--bg);color:var(--text)}
-    body.ios-full{padding-top:env(safe-area-inset-top);padding-bottom:env(safe-area-inset-bottom);height:100vh;overflow:hidden}
-    #app-loading{position:fixed;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;background:var(--bg);color:var(--text);z-index:9999;transition:opacity .3s}
-    #app-loading.hidden{opacity:0;pointer-events:none;z-index:-1}
-    .spinner{width:40px;height:40px;border:4px solid rgba(0,0,0,.1);border-left-color:var(--btn-bg);border-radius:50%;animation:spin 1s linear infinite}
-    html.dark .spinner{border:4px solid rgba(255,255,255,.1);border-left-color:var(--link)}
-    .loading-text{margin-top:20px;font:bold 14px/1 Arial, sans-serif;letter-spacing:1px}
-    @keyframes spin{to{transform:rotate(360deg)}}
-    .header{background:var(--sec-bg);padding:calc(16px + env(safe-area-inset-top)) 16px;display:flex;align-items:center;justify-content:center;position:relative;backdrop-filter:blur(10px)}
-    .header h1{font:18px/1 Arial,sans-serif;font-weight:bold}
-    .fullscreen-btn{position:absolute;right:16px;background:none;border:none;color:var(--link);font-size:18px;cursor:pointer}
-    .content{overflow:auto;height:calc(100% - 49px - env(safe-area-inset-top));-webkit-overflow-scrolling:touch}
-    .section{padding:16px;margin-bottom:1px}
-    .section-title{font:16px/1 Arial,sans-serif;font-weight:bold;margin-bottom:8px}
-    .section-content{background:var(--sec-bg);border-radius:12px;padding:12px}
-    .board-link{display:block;padding:6px 0;color:var(--link);text-decoration:none;font-size:14px}
-  </style>
-</head>
-<body>
-  <div id="app-loading"><div class="spinner"></div><div class="loading-text">Загрузка досок...</div></div>
-  <div id="basic-app" style="display:none"><div class="header"><h1>TG Imgboard</h1><button class="fullscreen-btn" id="fs-btn">⤢</button></div><div class="content" id="board-container"></div></div>
-  <script>
-    const tg=window.Telegram?.WebApp;const isIOS=/iPad|iPhone|iPod/.test(navigator.userAgent);
-    if(isIOS)document.body.classList.add('ios');
-    tg?.onEvent('themeChanged',()=>document.documentElement.classList.toggle('dark',tg.colorScheme=='dark'));
-    document.getElementById('fs-btn')?.addEventListener('click',()=>tg?.expand());
-    async function init(){
-      const order=['Тематика','Творчество','Политика и новости','Техника и софт','Игры','Взрослым','Японская культура','Разное'];
-      const res=await fetch('https://2ch.hk/api/mobile/v2/boards');
-      const data=await res.json();
-      const boards=data.boards||[];
-      const container=document.getElementById('board-container');
-      order.forEach(cat=>{
-        const list=boards.filter(b=>b.category==cat);
-        if(list.length)container.append(createSection(cat,list));
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <link rel="icon" href="/webapp-tg-imgboard/favicon.ico">
+    <!-- Метатеги для iOS -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="TG Imgboard">
+    <meta name="mobile-web-app-capable" content="yes">
+    <meta name="theme-color" content="#2678b6">
+    <!-- Специфичные для iOS стили -->
+    <meta name="format-detection" content="telephone=no">
+    <meta name="apple-touch-fullscreen" content="yes">
+    <link rel="apple-touch-icon" href="/webapp-tg-imgboard/apple-touch-icon.png">
+    <link rel="manifest" href="/webapp-tg-imgboard/manifest.json">
+    <title>TG Imgboard</title>
+
+    <!-- Загружаем Telegram WebApp скрипт до основного приложения -->
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+
+    <!-- Встроенные базовые стили -->
+    <style>
+      :root {
+        --tg-theme-bg-color: #ffffff;
+        --tg-theme-text-color: #222222;
+        --tg-theme-hint-color: #999999;
+        --tg-theme-link-color: #2678b6;
+        --tg-theme-button-color: #2678b6;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #f5f5f5;
+        --safe-area-inset-top: env(safe-area-inset-top, 0px);
+        --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+      }
+      
+      html.dark {
+        --tg-theme-bg-color: #212121;
+        --tg-theme-text-color: #ffffff;
+        --tg-theme-hint-color: #aaaaaa;
+        --tg-theme-link-color: #8cc2ff;
+        --tg-theme-button-color: #2678b6;
+        --tg-theme-button-text-color: #ffffff;
+        --tg-theme-secondary-bg-color: #292929;
+      }
+      
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+      }
+      
+      html, body {
+        height: 100%;
+        width: 100%;
+        padding: 0;
+        margin: 0;
+        overflow: hidden;
+      }
+      
+      body {
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
+        /* Предотвращение прокрутки и полноэкранный режим */
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        overflow: hidden;
+        -webkit-text-size-adjust: 100%;
+        -webkit-font-smoothing: antialiased;
+      }
+      
+      /* Специфичные стили для iOS в полноэкранном режиме */
+      body.ios-fullscreen {
+        /* Добавление полей под notch и home indicator */
+        padding-top: var(--safe-area-inset-top);
+        padding-bottom: var(--safe-area-inset-bottom);
+        /* Фиксация размера экрана */
+        height: 100vh;
+        width: 100vw;
+        /* Предотвращение скролла и эффектов scale */
+        overflow: hidden;
+        -webkit-overflow-scrolling: touch;
+      }
+      
+      #app {
+        height: 100%;
+        width: 100%;
+        overflow: auto;
+        -webkit-overflow-scrolling: touch;
+        position: relative;
+      }
+      
+      #app-loading {
+        position: fixed;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        background-color: var(--tg-theme-bg-color);
+        color: var(--tg-theme-text-color);
+        transition: opacity 0.3s;
+        z-index: 9999;
+      }
+      
+      #app-loading.hidden {
+        opacity: 0;
+        pointer-events: none;
+        z-index: -1;
+      }
+      
+      .spinner {
+        width: 40px;
+        height: 40px;
+        margin-bottom: 20px;
+        border: 4px solid rgba(0, 0, 0, 0.1);
+        border-left-color: var(--tg-theme-button-color);
+        border-radius: 50%;
+        animation: spin 1s linear infinite;
+      }
+      
+      html.dark .spinner {
+        border: 4px solid rgba(255, 255, 255, 0.1);
+        border-left-color: var(--tg-theme-link-color);
+      }
+      
+      .loading-text {
+        font-size: 14px;
+        letter-spacing: 1px;
+        font-weight: bold;
+      }
+      
+      @keyframes spin {
+        to { transform: rotate(360deg); }
+      }
+      
+      /* Стили для базового интерфейса */
+      .header {
+        background-color: var(--tg-theme-secondary-bg-color);
+        padding: 16px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        position: relative;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        padding-top: calc(16px + var(--safe-area-inset-top));
+        -webkit-backdrop-filter: blur(10px);
+        backdrop-filter: blur(10px);
+      }
+      
+      /* Специальные отступы для iOS в полноэкранном режиме */
+      body.ios-fullscreen .header {
+        padding-top: calc(16px + env(safe-area-inset-top, 20px));
+      }
+      
+      .header h1 {
+        font-size: 18px;
+        font-weight: bold;
+        flex-grow: 1;
+        text-align: center;
+      }
+      
+      .back-button {
+        background: none;
+        border: none;
+        color: var(--tg-theme-button-color);
+        font-size: 18px;
+        padding: 8px;
+        cursor: pointer;
+        position: absolute;
+        left: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      
+      /* Полноэкранная кнопка */
+      .fullscreen-button {
+        background: none;
+        border: none;
+        color: var(--tg-theme-button-color);
+        font-size: 18px;
+        padding: 8px;
+        cursor: pointer;
+        position: absolute;
+        right: 8px;
+        top: 50%;
+        transform: translateY(-50%);
+        z-index: 10;
+        display: flex;
+        align-items: center;
+        -webkit-appearance: none;
+        appearance: none;
+      }
+      
+      /* Специфичные для iOS стили */
+      @supports (-webkit-touch-callout: none) {
+        .content {
+          padding: 0;
+          height: calc(100vh - 49px - env(safe-area-inset-top, 0px));
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+          position: relative;
+          z-index: 1;
+        }
+        
+        /* Для iOS в полноэкранном режиме */
+        body.ios-fullscreen .content {
+          height: calc(100vh - 49px - env(safe-area-inset-top, 20px) - env(safe-area-inset-bottom, 20px));
+        }
+      }
+      
+      /* Стили для других платформ */
+      @supports not (-webkit-touch-callout: none) {
+        .content {
+          padding: 0;
+          height: calc(100% - 49px - var(--safe-area-inset-top));
+          overflow-y: auto;
+          -webkit-overflow-scrolling: touch;
+        }
+      }
+      
+      .welcome-text {
+        margin-bottom: 24px;
+        font-size: 18px;
+        text-align: center;
+        padding: 20px 16px 0;
+      }
+      
+      /* Стили для секций */
+      .section {
+        padding: 20px 16px;
+        margin-bottom: 1px;
+      }
+      
+      .section-title {
+        font-size: 16px;
+        font-weight: bold;
+        margin-bottom: 12px;
+        color: var(--tg-theme-text-color);
+      }
+      
+      .section-content {
+        background-color: var(--tg-theme-secondary-bg-color);
+        border-radius: 12px;
+        padding: 16px;
+        min-height: 120px;
+        -webkit-transform: translateZ(0);
+        transform: translateZ(0);
+      }
+      
+      .section-content p {
+        color: var(--tg-theme-hint-color);
+        font-size: 14px;
+        line-height: 1.5;
+      }
+    </style>
+    <script type="module" crossorigin src="/webapp-tg-imgboard/assets/index-BYsZT7GY.js"></script>
+    <link rel="stylesheet" crossorigin href="/webapp-tg-imgboard/assets/index-7Wij1rAw.css">
+  </head>
+  <body>
+    <!-- Базовый экран загрузки -->
+    <div id="app-loading">
+      <div class="spinner"></div>
+      <div class="loading-text">BOARD LOADING...</div>
+    </div>
+    
+    <!-- Базовый интерфейс приложения - будет виден даже без Vue -->
+    <div id="basic-app" style="display: none; height: 100%; overflow: hidden;">
+      <div class="header">
+        <h1>TG Imgboard</h1>
+        <button class="fullscreen-button" id="fullscreen-app">
+          <span>⤢</span>
+        </button>
+      </div>
+      
+      <div class="content">
+        <p class="welcome-text">
+          Добро пожаловать в Telegram WebApp!
+        </p>
+        
+        <!-- Три прокручиваемые секции -->
+        <div class="section">
+          <div class="section-title">Секция 1</div>
+          <div class="section-content">
+            <p>Это первая секция вашего приложения. Здесь может быть размещен любой контент, такой как изображения, текст или интерактивные элементы.</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Секция 2</div>
+          <div class="section-content">
+            <p>Вторая секция для другого контента. Вы можете добавить здесь свой специфический контент или функциональность для вашего приложения.</p>
+          </div>
+        </div>
+        
+        <div class="section">
+          <div class="section-title">Секция 3</div>
+          <div class="section-content">
+            <p>Третья секция завершает интерфейс. Это прокручиваемая панель, и вы можете добавить сколько угодно секций.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    
+    <!-- Контейнер для Vue приложения -->
+    <div id="app" style="display: none;"></div>
+
+    <script>
+      // Определяем iOS устройства
+      var isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+      
+      // Базовая проверка наличия Telegram WebApp API
+      window.addEventListener('DOMContentLoaded', function() {
+        // Элементы страницы
+        var appLoading = document.getElementById('app-loading');
+        var basicApp = document.getElementById('basic-app');
+        var vueApp = document.getElementById('app');
+        var isAppHidden = false;
+        
+        // Настраиваем для iOS
+        if (isIOS) {
+          document.body.classList.add('ios');
+          
+          // Специальные настройки для iOS полноэкранного режима
+          // Предотвращаем скроллинг страницы целиком на iOS
+          document.addEventListener('touchmove', function(event) {
+            // Разрешаем скроллинг только внутри элементов с классом content
+            if (!event.target.closest('.content')) {
+              event.preventDefault();
+            }
+          }, { passive: false });
+        }
+        
+        // Инициализация Telegram API
+        var tg = null;
+        if (window.Telegram && window.Telegram.WebApp) {
+          tg = window.Telegram.WebApp;
+          
+          // Отключаем свайп вниз для закрытия приложения
+          try {
+            if (window.Telegram && window.Telegram.WebApp) {
+              var eventData = JSON.stringify({ allow_vertical_swipe: false });
+              if (window.TelegramWebviewProxy) {
+                window.TelegramWebviewProxy.postEvent('web_app_setup_swipe_behavior', eventData);
+              } else {
+                window.parent.postMessage(JSON.stringify({
+                  eventType: 'web_app_setup_swipe_behavior',
+                  eventData: { allow_vertical_swipe: false }
+                }), 'https://web.telegram.org');
+              }
+              console.log('Свайп вниз отключен');
+            }
+          } catch (e) {
+            console.error('Ошибка при отключении свайпа вниз:', e);
+          }
+          
+          // Блокировка ориентации экрана в портретном режиме
+          try {
+            if (window.Telegram && window.Telegram.WebApp) {
+              var orientationData = JSON.stringify({ locked: true });
+              if (window.TelegramWebviewProxy) {
+                window.TelegramWebviewProxy.postEvent('web_app_toggle_orientation_lock', orientationData);
+              } else {
+                window.parent.postMessage(JSON.stringify({
+                  eventType: 'web_app_toggle_orientation_lock',
+                  eventData: { locked: true }
+                }), 'https://web.telegram.org');
+              }
+              console.log('Ориентация экрана заблокирована');
+            }
+          } catch (e) {
+            console.error('Ошибка при блокировке ориентации экрана:', e);
+          }
+          
+          // Применяем темную тему если нужно
+          if (tg.colorScheme === 'dark') {
+            document.documentElement.classList.add('dark');
+          }
+          
+          // Настройка переменных CSS на основе Telegram темы
+          if (tg.themeParams) {
+            document.documentElement.style.setProperty('--tg-theme-bg-color', tg.themeParams.bg_color);
+            document.documentElement.style.setProperty('--tg-theme-text-color', tg.themeParams.text_color);
+            document.documentElement.style.setProperty('--tg-theme-hint-color', tg.themeParams.hint_color);
+            document.documentElement.style.setProperty('--tg-theme-link-color', tg.themeParams.link_color);
+            document.documentElement.style.setProperty('--tg-theme-button-color', tg.themeParams.button_color);
+            document.documentElement.style.setProperty('--tg-theme-button-text-color', tg.themeParams.button_text_color);
+            document.documentElement.style.setProperty('--tg-theme-secondary-bg-color', tg.themeParams.secondary_bg_color);
+          }
+          
+          // Кнопка закрытия удалена
+          
+          // Обработчик для кнопки полного экрана
+          var fullscreenButton = document.getElementById('fullscreen-app');
+          if (fullscreenButton) {
+            // Функция переключения полноэкранного режима
+            var toggleFullScreen = function() {
+              try {
+                if (isIOS) {
+                  // Специальный подход для iOS
+                  document.body.classList.toggle('ios-fullscreen');
+                  
+                  // Используем несколько методов для полноэкранного режима на iOS
+                  if (tg.isExpanded) {
+                    // Если метод requestFullscreen доступен
+                    if (typeof tg.requestFullscreen === 'function') {
+                      tg.requestFullscreen();
+                    }
+                  }
+                  
+                  // В любом случае используем expand для iOS
+                  if (typeof tg.expand === 'function') {
+                    tg.expand();
+                  }
+                  
+                  // Дополнительно для iOS устанавливаем специфичные стили
+                  setTimeout(function() {
+                    // Устанавливаем viewport на полный размер
+                    var viewportMeta = document.querySelector('meta[name="viewport"]');
+                    if (viewportMeta) {
+                      viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui');
+                    }
+                    
+                    // Обновляем скролл в контентной области
+                    var content = document.querySelector('.content');
+                    if (content) {
+                      content.style.overflow = 'hidden';
+                      setTimeout(function() {
+                        content.style.overflow = 'auto';
+                      }, 50);
+                    }
+                  }, 100);
+                } else {
+                  // Для других платформ используем стандартный подход
+                  if (tg && typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  } else if (tg && typeof tg.expand === 'function') {
+                    // Если requestFullscreen не доступен, используем expand как запасной вариант
+                    tg.expand();
+                  }
+                }
+              } catch (e) {
+                console.error('Ошибка при переключении полноэкранного режима:', e);
+              }
+            };
+            
+            // Добавляем обработчики событий
+            fullscreenButton.addEventListener('click', toggleFullScreen);
+            
+            if (isIOS) {
+              fullscreenButton.addEventListener('touchstart', function() {
+                this.style.opacity = '0.7';
+              });
+              fullscreenButton.addEventListener('touchend', function() {
+                this.style.opacity = '1';
+                toggleFullScreen();
+              });
+            }
+          }
+          
+          // Автоматически активируем полноэкранный режим при загрузке
+          setTimeout(function() {
+            try {
+              // Активируем функционал полноэкранной кнопки
+              if (isIOS) {
+                // Специальный подход для iOS
+                document.body.classList.add('ios-fullscreen');
+                
+                // Используем несколько методов для полноэкранного режима на iOS
+                // Если метод requestFullscreen доступен
+                if (typeof tg.requestFullscreen === 'function') {
+                  tg.requestFullscreen();
+                }
+                    
+                // В любом случае используем expand для iOS
+                if (typeof tg.expand === 'function') {
+                  tg.expand();
+                }
+                
+                // Дополнительно для iOS устанавливаем специфичные стили
+                setTimeout(function() {
+                  // Устанавливаем viewport на полный размер
+                  var viewportMeta = document.querySelector('meta[name="viewport"]');
+                  if (viewportMeta) {
+                    viewportMeta.setAttribute('content', 'width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, minimal-ui');
+                  }
+                  
+                  // Обновляем скролл в контентной области
+                  var content = document.querySelector('.content');
+                  if (content) {
+                    content.style.overflow = 'hidden';
+                    setTimeout(function() {
+                      content.style.overflow = 'auto';
+                    }, 50);
+                  }
+                  
+                  // Повторно вызываем для надежности
+                  if (typeof tg.expand === 'function') {
+                    tg.expand();
+                  }
+                  if (typeof tg.requestFullscreen === 'function') {
+                    tg.requestFullscreen();
+                  }
+                }, 300);
+              } else {
+                // Для других платформ используем стандартный подход
+                if (tg && typeof tg.requestFullscreen === 'function') {
+                  tg.requestFullscreen();
+                } else if (tg && typeof tg.expand === 'function') {
+                  tg.expand();
+                }
+              }
+              
+              console.log('Автоматически активирован полноэкранный режим');
+            } catch (e) {
+              console.error('Ошибка при активации полноэкранного режима:', e);
+            }
+          }, isIOS ? 500 : 300);
+        }
+        
+        // Функция скрытия экрана загрузки
+        window.hideLoading = function() {
+          if (isAppHidden) return; // Предотвращаем повторное скрытие
+          isAppHidden = true;
+          
+          // Скрываем экран загрузки
+          appLoading.classList.add('hidden');
+          
+          // Показываем базовый интерфейс
+          basicApp.style.display = 'block';
+          
+          try {
+            // Пытаемся монтировать Vue приложение с задержкой
+            setTimeout(function() {
+              vueApp.style.display = 'block';
+              
+              // iOS-специфичная подстройка скролла
+              if (isIOS) {
+                // Иногда для iOS требуется принудительно обновить область прокрутки
+                var content = document.querySelector('.content');
+                if (content) {
+                  content.style.overflow = 'hidden';
+                  setTimeout(function() {
+                    content.style.overflow = 'auto';
+                  }, 50);
+                }
+              }
+              
+              // Полностью удаляем экран загрузки после анимации
+              setTimeout(function() {
+                if (appLoading.parentNode) {
+                  appLoading.parentNode.removeChild(appLoading);
+                }
+              }, 300);
+            }, 100);
+          } catch (e) {
+            console.error('Ошибка при инициализации Vue:', e);
+          }
+        };
+        
+        // Инициализация Telegram WebApp и автоматическое скрытие экрана загрузки
+        setTimeout(function() {
+          if (window.Telegram && window.Telegram.WebApp) {
+            try {
+              // Сообщаем Telegram что приложение готово
+              window.Telegram.WebApp.ready();
+              window.Telegram.WebApp.expand();
+              
+              // Принудительно устанавливаем полноэкранный режим
+              document.documentElement.style.height = '100%';
+              document.body.style.height = '100%';
+            } catch (e) {
+              console.error('Ошибка при инициализации Telegram WebApp:', e);
+            }
+          }
+          
+          // ВАЖНО: Принудительно скрываем экран загрузки через 1 секунду
+          // Для iOS делаем немного дольше
+          setTimeout(function() {
+            window.hideLoading();
+          }, isIOS ? 1000 : 500);
+        }, 100);
+        
+        // Дополнительная защита: скрываем экран загрузки при загрузке страницы
+        window.addEventListener('load', function() {
+          setTimeout(function() {
+            window.hideLoading();
+          }, 500);
+        });
       });
-      const newList=boards.filter(b=>b.is_new);
-      if(newList.length)container.append(createSection('Новые доски',newList));
-      document.getElementById('app-loading').classList.add('hidden');
-      document.getElementById('basic-app').style.display='block';
-      tg?.ready();tg?.expand();
-    }
-    function createSection(title,boards){
-      const sec=document.createElement('div');sec.className='section';
-      sec.innerHTML=`<div class="section-title">${title}</div><div class="section-content">${boards.map(b=>`<a href="#" class="board-link" data-board="${b.name}">${b.title||b.name}</a>`).join('')}</div>`;
-      return sec;
-    }
-    window.addEventListener('load',init);
-  </script>
-</body>
+    </script>
+    
+    <!-- Vue приложение (загружается отложенно) -->
+  </body>
 </html>
